@@ -1,0 +1,51 @@
+* Board representation for printing/reading from console. *
+
+Due to the fact that pieces can be rotated it is difficult to represent them nicely in a single character. I am going to use two characters per piece.
+
+The Pyramid has four distinct orientations. I define P1 to be the pyramid where the mirror is pointing to the North-East. Rotating anti-clockwise 90 degress from here generates P2, P3 and P4.
+
+A similar definition is made for the Anubis: A1 = Anubis pointing North and generate A2, A3 and A4 by rotating anti-clockwise.
+
+The Scarab only really has two orientations: S1 & S2. In S1 the mirrors point NE and SW, and in S2 the mirrors point SE and NW.
+
+Each Sphinx can only rotate between two states, but between them all orientations are covered so define X1, X2, X3 and X4.
+
+Rotating the Pharaoh is forbidden as it does not change the board state. This is represented by K0.
+
+When printing the board it is probably nicest to have two copies of the board, one which just shows the piece types and another showing the rotations.
+
+Silver goes first and their characters will be represented by uppercase characters. Red's pieces will be lower case. The board is shown from silver's perspective.
+
+Using these conventions the "standard" initial board state is:
+
+------------
+|x...akap..|
+|..p.......|
+|...P......|
+|p.P.ss.p.P|
+|p.P.SS.p.P|
+|......p...|
+|.......P..|
+|..PAKA...X|
+------------
+
+------------
+|3000303200|
+|0030000000|
+|0004000000|
+|1030120204|
+|2040210103|
+|0000002000|
+|0000000100|
+|0004101001|
+------------
+
+* Move representation *
+There is no standardised notation for Khet moves so I introduce one for this program.
+
+Similar to in chess, the columns are labelled by letters: a-j and the rows by numbers: 1-8.
+
+For a rotation move the direction of the rotation must be specified, for this use +/- after the location where '+' indicates an anti-clockwise rotation and '-' a clockwise rotation.
+
+Thus rotating the silver pyramid on h2 clockwise is denoted by "h2-".
+
