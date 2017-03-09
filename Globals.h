@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <string>
 
-typedef uint8_t box;
+typedef uint8_t Square;
 
 // The padded dimensions of the board.
 const int BoardWidth = 12;
@@ -12,14 +12,14 @@ const int BoardHeight = 10;
 const int BoardArea = BoardWidth * BoardHeight;
 
 // This constant is used to indicate that a location is off board.
-const box OffBoard = 0;
+const Square OffBoard = 0;
 
 // This constant is used to indicate that a location is empty.
-const box Empty = 1;
+const Square Empty = 1;
 
 // The standard opening configuration for the game.
 const std::string Standard = 
-    "x33a3ka3p22/2p37/3P46/p11P31s1s21p21P4/p21P41S2S11p11P3/6p23/7P12/2P4A1KA13X1";
+    "x33a3ka3p22/2p37/3P46/p11P31s1s21p21P4/p21P41S2S11p11P3/6p23/7P12/2P4A1KA13X1 0";
 
 // The player types.
 enum class Player

@@ -63,12 +63,16 @@ std::string Board::ToString() const
 // Initialise the board from the specified Khet string.
 void Board::FromString(const std::string& ks)
 {
-    memset(_board, OffBoard, BoardArea*sizeof(box));
+    memset(_board, OffBoard, BoardArea*sizeof(Square));
 
-    auto lines = Utils::GetInstance()->Split(ks, '/');
-    for (size_t i = 0; i < lines.size(); i++)
+    auto utils = Utils::GetInstance();
+    auto tokens = utils->Split(ks, ' ');
+    _playerToMove = tokens[1] == "0" ? Player::Silver : Player::Red;
+
+    tokens = utils->Split(tokens[0], '/');
+    for (size_t i = 0; i < tokens.size(); i++)
     {
-        ParseLine(i, lines[i]);
+        ParseLine(i, tokens[i]);
     }
 }
 

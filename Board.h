@@ -16,8 +16,10 @@ public:
     std::string ToString() const;
     
 private:
+    Player _playerToMove;
+
     // Mailbox style storage is used with one layer of padding.
-    box _board[BoardArea];
+    Square _board[BoardArea];
 
     void FromString(const std::string&);
     void ParseLine(int, const std::string&);
