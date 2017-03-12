@@ -2,6 +2,7 @@
 #define __BOARD_H__
 
 #include "Globals.h"
+#include "Types.h"
 #include <string>
 
 // Represents the Khet board state.
@@ -10,8 +11,12 @@ class Board
 {
 public:
     Board();
+    Board(const Board&);
     Board(const std::string&);
     ~Board();
+
+    inline Player GetPlayerToMove() { return _playerToMove; }
+    inline Square Get(int i) { return _board[i]; }
 
     std::string ToString() const;
     

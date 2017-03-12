@@ -1,6 +1,3 @@
-#ifndef __BOARD_HELPERS_H__
-#define __BOARD_HELPERS_H__
-
 #include "Globals.h"
 
 // The format for a Square (in bits) is:
@@ -9,25 +6,28 @@
 // B3-B5: Piece type
 // B6-B8: Orientation
 
-Square MakeBox(Player player, Piece piece, Orientation orientation)
+inline Square MakeBox(Player player, Piece piece, Orientation orientation)
 {
     return (Square)((int)player << 1 | (int)piece << 2 | (int)orientation << 5);
 }
 
-Player GetPlayer(Square b)
+inline Player GetOwner(Square s)
 {
-    return (Player)(b >> 1 & 0x1);
+    return (Player)(s >> 1 & 0x1);
 }
 
-Piece GetPiece(Square b)
+inline Piece GetPiece(Square s)
 {
-    return (Piece)(b >> 2 & 0x7);
+    return (Piece)(s >> 2 & 0x7);
 }
 
-Orientation GetOrientation(Square b)
+inline Orientation GetOrientation(Square s)
 {
-    return (Orientation)(b >> 5 & 0x7);
+    return (Orientation)(s >> 5 & 0x7);
 }
 
-#endif // __BOARD_HELPERS_H__
+inline bool IsPiece(Square s)
+{
+    return s != Empty && s != OffBoard;
+}
 

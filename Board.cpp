@@ -9,6 +9,12 @@ Board::Board()
     FromString(Standard);
 }
 
+Board::Board(const Board& other)
+{
+    _playerToMove = other._playerToMove;
+    memcpy(_board, other._board, BoardArea*sizeof(Square));
+}
+
 Board::Board(const std::string& ks)
 {
     FromString(ks);
@@ -47,7 +53,7 @@ std::string Board::ToString() const
             }
             else
             {
-                Player player = GetPlayer(_board[i]);
+                Player player = GetOwner(_board[i]);
                 Piece piece = GetPiece(_board[i]);
                 Orientation orientation = GetOrientation(_board[i]);
 
