@@ -18,12 +18,17 @@ private:
     Board* _board = nullptr;
     bool _hasPieces;
     int _pieceIndex = -1;
-    int _directionIndex;
-    int _rotationIndex;
+    size_t _directionIndex;
+    size_t _rotationIndex;
     Piece _pieceType;
 
-    Move* NextMoveForPiece();
     bool NextPiece();
+    Move* NextMoveForPiece();
+    Move* NextMoveForAnubis();
+    Move* NextMoveForPyramid();
+    Move* NextMoveForScarab();
+    Move* NextMoveForPharaoh();
+    Move* NextMoveForSphinx();
 };
 
 #endif // __MOVE_GENERATOR_H__

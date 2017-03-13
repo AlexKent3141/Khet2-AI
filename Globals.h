@@ -23,8 +23,8 @@ const std::string Standard =
 // Movement directions.
 const std::vector<int> Directions = 
 {
-    BoardHeight, -BoardHeight, 1, -1,                                    /* Orthogonals */
-    BoardHeight + 1, BoardHeight - 1, -BoardHeight + 1, -BoardHeight - 1 /* Diagonals */
+    BoardWidth, -BoardWidth, 1, -1,                                  /* Orthogonals */
+    BoardWidth + 1, BoardWidth - 1, -BoardWidth + 1, -BoardWidth - 1 /* Diagonals */
 };
 
 // Rotation directions.

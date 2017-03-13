@@ -36,8 +36,12 @@ enum class Orientation
 struct Move
 {
     int Start;
-    int Direction;
+    int End;
     int Rotation;
+
+    Move(int start, int end, int rotation) : Start(start), End(end), Rotation(rotation)
+    {
+    }
 };
 
 #endif // __TYPES_H__

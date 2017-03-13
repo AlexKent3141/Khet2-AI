@@ -34,7 +34,27 @@ Move* MoveGenerator::NextMoveForPiece()
 {
     Move* move = nullptr;
 
-    // TODO: There will need to be some piece specific functionality here.
+    // This is piece specific.
+    switch (_pieceType)
+    {
+    case Piece::Anubis:
+        move = NextMoveForAnubis();
+        break;
+    case Piece::Pyramid:
+        move = NextMoveForPyramid();
+        break;
+    case Piece::Scarab:
+        move = NextMoveForScarab();
+        break;
+    case Piece::Pharaoh:
+        move = NextMoveForPharaoh();
+        break;
+    case Piece::Sphinx:
+        move = NextMoveForSphinx();
+        break;
+    default:
+        break;
+    }
 
     return move;
 }
@@ -48,12 +68,59 @@ bool MoveGenerator::NextPiece()
         Square s = _board->Get(_pieceIndex);
         if (IsPiece(s) && GetOwner(s) == _board->GetPlayerToMove())
         {
-            _directionIndex = -1;
-            _rotationIndex = -1;
+            _directionIndex = 0;
+            _rotationIndex = 0;
             _pieceType = GetPiece(s);
             pieceFound = true;
         }
     }
 
     return pieceFound;
+}
+
+Move* MoveGenerator::NextMoveForAnubis()
+{
+    Move* move = nullptr;
+    int destIndex;
+
+    // Find the non-rotation moves.
+    // These moves can be blocked.
+    while (move == nullptr && _directionIndex++ < Directions.size())
+    {
+        // Is there a space in this direction?
+        destIndex = _pieceIndex + Directions[_directionIndex - 1];
+        if (_board->Get(destIndex) == Empty)
+        {
+            move = new Move(_pieceIndex, destIndex, 0);
+        }
+    }
+
+    // Find the rotation moves.
+    if (move == nullptr && _rotationIndex++ < Rotations.size())
+    {
+        move = new Move(_pieceIndex, _pieceIndex, Rotations[_rotationIndex - 1]);
+    }
+
+    return move;
+}
+
+// Pyramids have the same movement options as Anubis'.
+Move* MoveGenerator::NextMoveForPyramid()
+{
+    return NextMoveForAnubis();
+}
+
+Move* MoveGenerator::NextMoveForScarab()
+{
+    return nullptr;
+}
+
+Move* MoveGenerator::NextMoveForPharaoh()
+{
+    return nullptr;
+}
+
+Move* MoveGenerator::NextMoveForSphinx()
+{
+    return nullptr;
 }
