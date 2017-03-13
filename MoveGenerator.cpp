@@ -9,9 +9,10 @@ MoveGenerator::MoveGenerator(const Board& board)
 
 MoveGenerator::~MoveGenerator()
 {
-    if (_board == nullptr)
+    if (_board != nullptr)
     {
         delete _board;
+        _board = nullptr;
     }
 }
 
