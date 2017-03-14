@@ -4,6 +4,7 @@
 MoveGenerator::MoveGenerator(const Board& board)
 {
     _board = new Board(board);
+    _player = _board->GetPlayerToMove();
     _hasPieces = NextPiece();
 }
 
@@ -67,7 +68,7 @@ bool MoveGenerator::NextPiece()
     while (!pieceFound && ++_pieceIndex < BoardArea)
     {
         Square s = _board->Get(_pieceIndex);
-        if (IsPiece(s) && GetOwner(s) == _board->GetPlayerToMove())
+        if (IsPiece(s) && GetOwner(s) == _player)
         {
             _directionIndex = 0;
             _rotationIndex = 0;
@@ -90,7 +91,7 @@ Move* MoveGenerator::NextMoveForAnubis()
     {
         // Is there a space in this direction?
         destIndex = _pieceIndex + Directions[_directionIndex++];
-        if (_board->Get(destIndex) == Empty)
+        if (_board->Get(destIndex) == Empty && CanMove[(int)_player][destIndex])
         {
             move = new Move(_pieceIndex, destIndex, 0);
         }
@@ -126,7 +127,7 @@ Move* MoveGenerator::NextMoveForScarab()
         // Is there a space or swappable piece in this direction?
         destIndex = _pieceIndex + Directions[_directionIndex++];
         sq = _board->Get(destIndex);
-        if (sq == Empty || (sq != OffBoard && (int)GetPiece(sq) < 4))
+        if ((sq == Empty || (sq != OffBoard && (int)GetPiece(sq) < 4)) && CanMove[(int)_player][destIndex])
         {
             move = new Move(_pieceIndex, destIndex, 0);
         }
@@ -152,7 +153,7 @@ Move* MoveGenerator::NextMoveForPharaoh()
     {
         // Is there a space in this direction?
         destIndex = _pieceIndex + Directions[_directionIndex++];
-        if (_board->Get(destIndex) == Empty)
+        if (_board->Get(destIndex) == Empty && CanMove[(int)_player][destIndex])
         {
             move = new Move(_pieceIndex, destIndex, 0);
         }

@@ -16,6 +16,7 @@ public:
 
 private:
     Board* _board = nullptr;
+    Player _player;
     bool _hasPieces;
     int _pieceIndex = -1;
     size_t _directionIndex;
