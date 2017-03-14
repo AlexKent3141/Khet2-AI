@@ -86,10 +86,10 @@ Move* MoveGenerator::NextMoveForAnubis()
 
     // Find the non-rotation moves.
     // These moves can be blocked.
-    while (move == nullptr && _directionIndex++ < Directions.size())
+    while (move == nullptr && _directionIndex < Directions.size())
     {
         // Is there a space in this direction?
-        destIndex = _pieceIndex + Directions[_directionIndex - 1];
+        destIndex = _pieceIndex + Directions[_directionIndex++];
         if (_board->Get(destIndex) == Empty)
         {
             move = new Move(_pieceIndex, destIndex, 0);
@@ -97,9 +97,9 @@ Move* MoveGenerator::NextMoveForAnubis()
     }
 
     // Find the rotation moves.
-    if (move == nullptr && _rotationIndex++ < Rotations.size())
+    if (move == nullptr && _rotationIndex < Rotations.size())
     {
-        move = new Move(_pieceIndex, _pieceIndex, Rotations[_rotationIndex - 1]);
+        move = new Move(_pieceIndex, _pieceIndex, Rotations[_rotationIndex++]);
     }
 
     return move;
@@ -111,17 +111,64 @@ Move* MoveGenerator::NextMoveForPyramid()
     return NextMoveForAnubis();
 }
 
+// Scarabs have the additional ability that they can swap with pieces.
+// Only need to consider one rotation direction.
 Move* MoveGenerator::NextMoveForScarab()
 {
-    return nullptr;
+    Move* move = nullptr;
+    int destIndex;
+    Square sq;
+
+    // Find the non-rotation moves.
+    // These moves can be blocked.
+    while (move == nullptr && _directionIndex < Directions.size())
+    {
+        // Is there a space or swappable piece in this direction?
+        destIndex = _pieceIndex + Directions[_directionIndex++];
+        sq = _board->Get(destIndex);
+        if (sq == Empty || (sq != OffBoard && (int)GetPiece(sq) < 4))
+        {
+            move = new Move(_pieceIndex, destIndex, 0);
+        }
+    }
+
+    // Consider the rotation move.
+    if (move == nullptr && _rotationIndex == 0)
+    {
+        move = new Move(_pieceIndex, _pieceIndex, Rotations[_rotationIndex++]);
+    }
+    return move;
 }
 
+// Pharaohs aren't allowed to rotate - it would be equivalent to passing.
 Move* MoveGenerator::NextMoveForPharaoh()
 {
-    return nullptr;
+    Move* move = nullptr;
+    int destIndex;
+
+    // Find the non-rotation moves.
+    // These moves can be blocked.
+    while (move == nullptr && _directionIndex < Directions.size())
+    {
+        // Is there a space in this direction?
+        destIndex = _pieceIndex + Directions[_directionIndex++];
+        if (_board->Get(destIndex) == Empty)
+        {
+            move = new Move(_pieceIndex, destIndex, 0);
+        }
+    }
+
+    return move;
 }
 
 Move* MoveGenerator::NextMoveForSphinx()
 {
     return nullptr;
 }
+
+
+
+
+
+
+
