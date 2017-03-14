@@ -1,6 +1,7 @@
 #include "Globals.h"
 #include "Board.h"
 #include "MoveGenerator.h"
+#include "Move.h"
 #include <iostream>
 
 int main()
@@ -12,10 +13,7 @@ int main()
     Move* move;
     while ((move = gen.Next()) != nullptr)
     {
-        std::cout << move->Start     << " " 
-                  << move->End       << " " 
-                  << move->Rotation  << std::endl;
-
+        std::cout << move->ToString() << std::endl;
         delete move;
     }
 

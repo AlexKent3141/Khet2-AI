@@ -49,3 +49,7 @@ For a rotation move the direction of the rotation must be specified, for this us
 
 Thus rotating the silver pyramid on h2 clockwise is denoted by "h2-".
 
+For a non-rotating move we just specify the start and end locations algebraically.
+
+Thus moving the silver pyramid on h2 left is denoted by "h2g2".
+

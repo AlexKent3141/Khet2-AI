@@ -1,9 +1,9 @@
 #ifndef __MOVE_GENERATOR_H__
 #define __MOVE_GENERATOR_H__
 
-#include "Types.h"
 #include "Globals.h"
 #include "Board.h"
+#include "Move.h"
 
 // The generator class generates moves incrementally.
 // It enumerates piece-wise.

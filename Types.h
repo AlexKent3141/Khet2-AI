@@ -32,16 +32,4 @@ enum class Orientation
     NW = 4
 };
 
-// This type describes a move.
-struct Move
-{
-    int Start;
-    int End;
-    int Rotation;
-
-    Move(int start, int end, int rotation) : Start(start), End(end), Rotation(rotation)
-    {
-    }
-};
-
 #endif // __TYPES_H__
