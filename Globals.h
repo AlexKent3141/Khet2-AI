@@ -29,9 +29,12 @@ const std::vector<int> Directions =
 
 // Rotation directions.
 const std::vector<int> Rotations = {
-    1,  /* Anti-clockwise */
-    -1, /* Clockwise */
+    1,  /* Clockwise */
+    -1, /* Anti-Clockwise */
 };
+
+// Cache the Sphinx locations for each player.
+const int Sphinx[2] = { 22, 97 };
 
 // Cache the locations that each player can move to.
 const int CanMove[2][BoardArea] = { 

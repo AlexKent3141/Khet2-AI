@@ -4,7 +4,7 @@
 MoveGenerator::MoveGenerator(const Board& board)
 {
     _board = new Board(board);
-    _player = _board->GetPlayerToMove();
+    _player = _board->PlayerToMove();
     _hasPieces = NextPiece();
 }
 
@@ -138,6 +138,7 @@ Move* MoveGenerator::NextMoveForScarab()
     {
         move = new Move(_pieceIndex, _pieceIndex, Rotations[_rotationIndex++]);
     }
+
     return move;
 }
 
@@ -162,9 +163,24 @@ Move* MoveGenerator::NextMoveForPharaoh()
     return move;
 }
 
+// Sphinxes cannot move but do have one rotation available to them on each turn.
 Move* MoveGenerator::NextMoveForSphinx()
 {
-    return nullptr;
+    Move* move = nullptr;
+
+    // There is exactly one rotation move available.
+    if (_rotationIndex++ == 0)
+    {
+        Square sq = _board->Get(Sphinx[(int)_player]);
+        auto o = GetOrientation(sq);
+        int rotation = _player == Player::Silver
+                       ? (o == Orientation::NE ? -1 : 1)
+                       : (o == Orientation::SE ? 1 : -1);
+
+        move = new Move(_pieceIndex, _pieceIndex, rotation);
+    }
+
+    return move;
 }
 
 

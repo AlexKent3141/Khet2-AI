@@ -15,8 +15,8 @@ public:
     Board(const std::string&);
     ~Board();
 
-    inline Player GetPlayerToMove() { return _playerToMove; }
-    inline Square Get(int i) { return _board[i]; }
+    inline Player PlayerToMove() const { return _playerToMove; }
+    inline Square Get(int i) const { return _board[i]; }
 
     std::string ToString() const;
     

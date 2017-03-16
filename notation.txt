@@ -45,9 +45,9 @@ There is no standardised notation for Khet moves so I introduce one for this pro
 
 Similar to in chess, the columns are labelled by letters: a-j and the rows by numbers: 1-8.
 
-For a rotation move the direction of the rotation must be specified, for this use +/- after the location where '+' indicates an anti-clockwise rotation and '-' a clockwise rotation.
+For a rotation move the direction of the rotation must be specified, for this use +/- after the location where '-' indicates an anti-clockwise rotation and '+' a clockwise rotation.
 
-Thus rotating the silver pyramid on h2 clockwise is denoted by "h2-".
+Thus rotating the silver pyramid on h2 clockwise is denoted by "h2+".
 
 For a non-rotating move we just specify the start and end locations algebraically.
 
