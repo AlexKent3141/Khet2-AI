@@ -1,5 +1,5 @@
 #include "MoveGenerator.h"
-#include "BoardHelpers.h"
+#include "SquareHelpers.h"
 
 MoveGenerator::MoveGenerator(const Board& board)
 {

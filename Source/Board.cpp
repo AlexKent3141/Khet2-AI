@@ -1,5 +1,5 @@
 #include "Board.h"
-#include "BoardHelpers.h"
+#include "SquareHelpers.h"
 #include "Utils.h"
 #include <cctype>
 #include <cstring>
@@ -124,7 +124,7 @@ void Board::ParseLine(int index, const std::string& line)
 
             if (piece == Piece::Pharaoh)
             {
-                _board[rowStart + rowIndex++] = MakeBox(player, piece, Orientation::NE);
+                _board[rowStart + rowIndex++] = MakeSquare(player, piece, Orientation::NE);
                 havePiece = false;
             }
         }
@@ -132,7 +132,7 @@ void Board::ParseLine(int index, const std::string& line)
         {
             // Orientation argument for the piece.
             orientation = (Orientation)(line[i] - 48);
-            _board[rowStart + rowIndex++] = MakeBox(player, piece, orientation);
+            _board[rowStart + rowIndex++] = MakeSquare(player, piece, orientation);
             havePiece = false;
         }
         else

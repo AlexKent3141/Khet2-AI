@@ -6,7 +6,7 @@
 // B3-B5: Piece type
 // B6-B8: Orientation
 
-inline Square MakeBox(Player player, Piece piece, Orientation orientation)
+inline Square MakeSquare(Player player, Piece piece, Orientation orientation)
 {
     return (Square)((int)player << 1 | (int)piece << 2 | (int)orientation << 5);
 }
