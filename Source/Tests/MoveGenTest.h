@@ -34,6 +34,12 @@ private:
         Board board(khetPosFull);
         int numMoves = CountMoves(board);
         std::cout << "Expected: " << expectedMoves << ", Got: " << numMoves << std::endl;
+
+        if (numMoves != expectedMoves)
+        {
+            std::cout << board.ToString() << std::endl;
+        }
+
         return numMoves == expectedMoves;
     }
 

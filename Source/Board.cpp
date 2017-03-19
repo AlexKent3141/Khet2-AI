@@ -89,6 +89,9 @@ void Board::ParseLine(int index, const std::string& line)
     int rowIndex = 1;
     int rowStart = BoardWidth * (BoardHeight - index - 2);
 
+    // Fill the line with empty initially.
+    memset(&_board[rowStart + rowIndex], Empty, (BoardWidth - 2)*sizeof(Square));
+
     bool havePiece = false;
     Piece piece;
     Player player;
@@ -118,12 +121,8 @@ void Board::ParseLine(int index, const std::string& line)
         }
         else
         {
-            // A gap which must be filled with empties.
-            int numSpaces = line[i] - '0';
-            for (int i = 0; i < numSpaces; i++)
-            {
-                _board[rowStart + rowIndex++] = Empty;
-            }
+            // A gap between pieces.
+            rowIndex += (line[i] - '0');
         }
     }
 }
