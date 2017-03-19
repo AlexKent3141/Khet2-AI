@@ -3,6 +3,7 @@
 
 #include "Globals.h"
 #include "Types.h"
+#include "Move.h"
 #include <string>
 
 // Represents the Khet board state.
@@ -13,10 +14,14 @@ public:
     Board();
     Board(const Board&);
     Board(const std::string&);
-    ~Board();
 
+    // Accessors.
     inline Player PlayerToMove() const { return _playerToMove; }
     inline Square Get(int i) const { return _board[i]; }
+
+    // Making/unmaking moves.
+    void MakeMove(const Move&);
+    void UndoMove();
 
     std::string ToString() const;
     

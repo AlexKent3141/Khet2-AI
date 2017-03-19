@@ -26,6 +26,13 @@ inline Orientation GetOrientation(Square s)
     return (Orientation)(s >> 5 & 0x7);
 }
 
+inline Square Rotate(Square s, int rotation)
+{
+    int o = (int)GetOrientation(s);
+    o = (o + rotation) % 5;
+    return (s & 0x1F) + (o << 5);
+}
+
 inline bool IsPiece(Square s)
 {
     return s != Empty && s != OffBoard;

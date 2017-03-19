@@ -20,8 +20,24 @@ Board::Board(const std::string& ks)
     FromString(ks);
 }
 
-Board::~Board()
+void Board::MakeMove(const Move& move)
 {
+    Square destPiece = _board[move.End()];
+    Square movingPiece = _board[move.Start()];
+
+    if (move.Rotation() != 0) 
+        movingPiece = Rotate(movingPiece, move.Rotation());
+
+    _board[move.End()] = movingPiece;
+    _board[move.Start()] = destPiece;
+
+    // TODO: Fire the laser and store capture.
+}
+
+// Note: The move that needs to be undone should already be cached.
+void Board::UndoMove()
+{
+    // TODO: Essentially reverse the 'MakeMove' method.
 }
 
 // Serialise the board to a human-readable string.
@@ -35,7 +51,7 @@ std::string Board::ToString() const
         for (int c = 0; c < BoardWidth; c++)
         {
             int i = r*BoardWidth + c;
-            if (i % 12 == 0)
+            if (i % BoardWidth == 0)
             {
                 pieces += "\n";
                 orientations += "\n";
