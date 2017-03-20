@@ -31,7 +31,15 @@ private:
     // Mailbox style storage is used with one layer of padding.
     Square _board[BoardArea];
 
+    // Cache capture types and locations.
+    int _captureLoc[MaxGameLength];
+    int _captureType[MaxGameLength];
+
+    void Init();
+
     void FromString(const std::string&);
+
+    // Serialisation.
     void ParseLine(int, const std::string&);
     Piece PieceFromChar(char) const;
     char CharFromPiece(Player, Piece) const;

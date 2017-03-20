@@ -6,30 +6,42 @@
 
 Board::Board()
 {
+    Init();
     FromString(Standard);
 }
 
 Board::Board(const Board& other)
 {
+    Init();
     _playerToMove = other._playerToMove;
     memcpy(_board, other._board, BoardArea*sizeof(Square));
 }
 
 Board::Board(const std::string& ks)
 {
+    Init();
     FromString(ks);
+}
+
+void Board::Init()
+{
+    memset(_captureLoc, -1, MaxGameLength*sizeof(int));
+    memset(_captureType, (int)Piece::None, MaxGameLength*sizeof(int));
 }
 
 void Board::MakeMove(const Move& move)
 {
-    Square destPiece = _board[move.End()];
-    Square movingPiece = _board[move.Start()];
+    int start = move.Start();
+    int end = move.End();
 
-    if (move.Rotation() != 0) 
+    Square movingPiece = _board[start];
+    if (move.Rotation() != 0)
+    {
         movingPiece = Rotate(movingPiece, move.Rotation());
+    }
 
-    _board[move.End()] = movingPiece;
-    _board[move.Start()] = destPiece;
+    _board[start] = _board[end];
+    _board[end] = movingPiece;
 
     // TODO: Fire the laser and store capture.
 }
@@ -131,7 +143,7 @@ void Board::ParseLine(int index, const std::string& line)
         else if (havePiece)
         {
             // Orientation argument for the piece.
-            orientation = (Orientation)(line[i] - 48);
+            orientation = (Orientation)(line[i] - '0');
             _board[rowStart + rowIndex++] = MakeSquare(player, piece, orientation);
             havePiece = false;
         }

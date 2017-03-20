@@ -9,6 +9,15 @@
 const int BoardWidth = 12;
 const int BoardHeight = 10;
 const int BoardArea = BoardWidth * BoardHeight;
+const int NumPiecesPerPlayer = 13;
+
+// Rules constants.
+const int RepetitionLimit = 3;
+const int TimeSinceCaptureLimit = 50;
+
+// Can compute an upper-bound for the maximum game length.
+// Assume that one piece is captured per TimeSinceCaptureLimit of moves.
+const int MaxGameLength = TimeSinceCaptureLimit * 2 * (NumPiecesPerPlayer - 4);
 
 // This constant is used to indicate that a location is off board.
 const Square OffBoard = 0;
