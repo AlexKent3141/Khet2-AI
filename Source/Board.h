@@ -27,15 +27,19 @@ public:
     
 private:
     Player _playerToMove;
+    int _moveNumber = 0;
 
     // Mailbox style storage is used with one layer of padding.
     Square _board[BoardArea];
 
-    // Cache capture types and locations.
+    // Cache capture piece types, orientations and locations.
     int _captureLoc[MaxGameLength];
+    int _captureOrientation[MaxGameLength];
     int _captureType[MaxGameLength];
 
     void Init();
+
+    void FireLaser();
 
     void FromString(const std::string&);
 

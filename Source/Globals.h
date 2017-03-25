@@ -32,9 +32,11 @@ const std::string Standard =
 // Movement directions.
 const std::vector<int> Directions = 
 {
-    BoardWidth, -BoardWidth, 1, -1,                                  /* Orthogonals */
+    BoardWidth, 1, -BoardWidth, -1,                                  /* Orthogonals */
     BoardWidth + 1, BoardWidth - 1, -BoardWidth + 1, -BoardWidth - 1 /* Diagonals */
 };
+
+const int Absorbed = -2;
 
 // Rotation directions.
 const std::vector<int> Rotations = {
@@ -70,6 +72,42 @@ const int CanMove[2][BoardArea] = {
         0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0,
         0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    }
+};
+
+// Reflections map indicating the resulting laser direction given:
+// 1). Incoming direction (index)
+// 2). Piece type (-2)
+// 3). Piece orientation (-1)
+// A value of zero = death
+const int Reflections[4][5][4] = {
+    {
+        { 0, 0, Absorbed, 0 },
+        { 0, Directions[1], Directions[3], 0 },
+        { Directions[3], Directions[1], Directions[3], Directions[1] },
+        { 0, 0, 0, 0},
+        { Absorbed, Absorbed, Absorbed, Absorbed }
+    },
+    {
+        { 0, 0, 0, Absorbed },
+        { 0, 0, Directions[2], Directions[0] },
+        { Directions[2], Directions[0], Directions[2], Directions[0] },
+        { 0, 0, 0, 0},
+        { Absorbed, Absorbed, Absorbed, Absorbed }
+    },
+    {
+        { Absorbed, 0, 0, 0 },
+        { Directions[1], 0, 0, Directions[3] },
+        { Directions[1], Directions[3], Directions[1], Directions[3] },
+        { 0, 0, 0, 0},
+        { Absorbed, Absorbed, Absorbed, Absorbed }
+    },
+    {
+        { 0, Absorbed, 0, 0 },
+        { Directions[0], Directions[2], 0, 0 },
+        { Directions[0], Directions[2], Directions[0], Directions[2] },
+        { 0, 0, 0, 0},
+        { Absorbed, Absorbed, Absorbed, Absorbed }
     }
 };
 

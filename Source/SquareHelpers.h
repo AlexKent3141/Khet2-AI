@@ -8,7 +8,7 @@
 
 inline Square MakeSquare(Player player, Piece piece, Orientation orientation)
 {
-    return (Square)((int)player << 1 | (int)piece << 2 | (int)orientation << 5);
+    return (Square)((int)player << 1 | (int)piece << 2 | orientation << 5);
 }
 
 inline Player GetOwner(Square s)
@@ -28,7 +28,7 @@ inline Orientation GetOrientation(Square s)
 
 inline Square Rotate(Square s, int rotation)
 {
-    int o = (int)GetOrientation(s);
+    int o = GetOrientation(s);
     o = (o + rotation) % 5;
     return (s & 0x1F) + (o << 5);
 }

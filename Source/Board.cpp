@@ -26,6 +26,7 @@ Board::Board(const std::string& ks)
 void Board::Init()
 {
     memset(_captureLoc, -1, MaxGameLength*sizeof(int));
+    memset(_captureOrientation, 0, MaxGameLength*sizeof(int));
     memset(_captureType, (int)Piece::None, MaxGameLength*sizeof(int));
 }
 
@@ -43,13 +44,49 @@ void Board::MakeMove(const Move& move)
     _board[start] = _board[end];
     _board[end] = movingPiece;
 
-    // TODO: Fire the laser and store capture.
+    FireLaser();
+
+    ++_moveNumber;
+    _playerToMove = _playerToMove == Player::Silver ? Player::Red : Player::Silver;
 }
 
 // Note: The move that needs to be undone should already be cached.
 void Board::UndoMove()
 {
     // TODO: Essentially reverse the 'MakeMove' method.
+}
+
+void Board::FireLaser()
+{
+    // Find the starting location and direction for the laser beam.
+    int loc = Sphinx[(int)_playerToMove];
+    int o = GetOrientation(_board[loc]);
+    int dir = Directions[o - 1];
+    Square dest = Empty;
+    Piece p;
+    while (dest != OffBoard && dir != 0 && dir != Absorbed)
+    {
+        // Take a step with the laser beam.
+        loc += dir;
+
+        // Is this location occupied?
+        dest = _board[loc];
+        if (IsPiece(dest))
+        {
+            p = GetPiece(dest);
+            int po = GetOrientation(dest);
+            dir = Reflections[o - 1][(int)p - 2][po - 1];
+            o = po;
+        }
+    }
+
+    // Was there a capture?
+    if (dir == 0)
+    {
+        _captureLoc[_moveNumber] = loc;
+        _captureOrientation[_moveNumber] = GetOrientation(dest);
+        _captureType[_moveNumber] = (int)p;
+    }
 }
 
 // Serialise the board to a human-readable string.
@@ -136,7 +173,7 @@ void Board::ParseLine(int index, const std::string& line)
 
             if (piece == Piece::Pharaoh)
             {
-                _board[rowStart + rowIndex++] = MakeSquare(player, piece, Orientation::NE);
+                _board[rowStart + rowIndex++] = MakeSquare(player, piece, Orientation::Up);
                 havePiece = false;
             }
         }

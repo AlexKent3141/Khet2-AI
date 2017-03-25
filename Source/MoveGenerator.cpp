@@ -172,10 +172,10 @@ Move* MoveGenerator::NextMoveForSphinx()
     if (_rotationIndex++ == 0)
     {
         Square sq = _board->Get(Sphinx[(int)_player]);
-        auto o = GetOrientation(sq);
+        int o = GetOrientation(sq);
         int rotation = _player == Player::Silver
-                       ? (o == Orientation::NE ? -1 : 1)
-                       : (o == Orientation::SE ? 1 : -1);
+                       ? (o == Up ? -1 : 1)
+                       : (o == Down ? -1 : 1);
 
         move = new Move(_pieceIndex, _pieceIndex, rotation);
     }
