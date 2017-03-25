@@ -26,10 +26,10 @@ enum class Piece
 // The orientation of a piece.
 enum Orientation
 {
-    Up = 1,
-    Right = 2,
-    Down = 3,
-    Left = 4
+    Up = 0,
+    Right = 1,
+    Down = 2,
+    Left = 3
 };
 
 #endif // __TYPES_H__

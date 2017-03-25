@@ -25,20 +25,18 @@ Board::Board(const std::string& ks)
 
 void Board::Init()
 {
-    memset(_captureLoc, -1, MaxGameLength*sizeof(int));
-    memset(_captureOrientation, 0, MaxGameLength*sizeof(int));
-    memset(_captureType, (int)Piece::None, MaxGameLength*sizeof(int));
+    memset(_captureSquare, Empty, MaxGameLength*sizeof(Square));
 }
 
-void Board::MakeMove(const Move& move)
+void Board::MakeMove(Move const* const move)
 {
-    int start = move.Start();
-    int end = move.End();
+    int start = move->Start();
+    int end = move->End();
 
     Square movingPiece = _board[start];
-    if (move.Rotation() != 0)
+    if (move->Rotation() != 0)
     {
-        movingPiece = Rotate(movingPiece, move.Rotation());
+        movingPiece = Rotate(movingPiece, move->Rotation());
     }
 
     _board[start] = _board[end];
@@ -46,14 +44,36 @@ void Board::MakeMove(const Move& move)
 
     FireLaser();
 
-    ++_moveNumber;
     _playerToMove = _playerToMove == Player::Silver ? Player::Red : Player::Silver;
+
+    _moves[_moveNumber++] = move;
 }
 
 // Note: The move that needs to be undone should already be cached.
 void Board::UndoMove()
 {
-    // TODO: Essentially reverse the 'MakeMove' method.
+    Move const* const move = _moves[--_moveNumber];
+
+    int start = move->Start();
+    int end = move->End();
+    Square movedPiece = _board[end];
+
+    // Reverse the rotation.
+    if (move->Rotation() != 0)
+    {
+        movedPiece = Rotate(movedPiece, -1*move->Rotation());
+    }
+
+    _board[end] = _board[start];
+    _board[start] = movedPiece;
+
+    // Restore any captured pieces.
+    if (_captureSquare[_moveNumber] != Empty)
+    {
+        _board[end] = _captureSquare[_moveNumber];
+    }
+
+    _playerToMove = _playerToMove == Player::Silver ? Player::Red : Player::Silver;
 }
 
 void Board::FireLaser()
@@ -81,12 +101,7 @@ void Board::FireLaser()
     }
 
     // Was there a capture?
-    if (dir == 0)
-    {
-        _captureLoc[_moveNumber] = loc;
-        _captureOrientation[_moveNumber] = GetOrientation(dest);
-        _captureType[_moveNumber] = (int)p;
-    }
+    _captureSquare[_moveNumber] = dir == 0 ? dest : Empty;
 }
 
 // Serialise the board to a human-readable string.

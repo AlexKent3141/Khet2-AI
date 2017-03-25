@@ -20,7 +20,7 @@ public:
     inline Square Get(int i) const { return _board[i]; }
 
     // Making/unmaking moves.
-    void MakeMove(const Move&);
+    void MakeMove(Move const* const);
     void UndoMove();
 
     std::string ToString() const;
@@ -32,10 +32,11 @@ private:
     // Mailbox style storage is used with one layer of padding.
     Square _board[BoardArea];
 
-    // Cache capture piece types, orientations and locations.
-    int _captureLoc[MaxGameLength];
-    int _captureOrientation[MaxGameLength];
-    int _captureType[MaxGameLength];
+    // Move list.
+    const Move* _moves[MaxGameLength];
+
+    // Cache the capture square.
+    Square _captureSquare[MaxGameLength];
 
     void Init();
 
