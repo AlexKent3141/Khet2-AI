@@ -36,8 +36,6 @@ const std::vector<int> Directions =
     BoardWidth + 1, BoardWidth - 1, -BoardWidth + 1, -BoardWidth - 1 /* Diagonals */
 };
 
-const int Absorbed = -2;
-
 // Rotation directions.
 const std::vector<int> Rotations = {
     1,  /* Clockwise */
@@ -75,38 +73,41 @@ const int CanMove[2][BoardArea] = {
     }
 };
 
-// Reflections map indicating the resulting laser direction given:
+const int Dead = -1;
+const int Absorbed = -2;
+
+// Reflections map indicating the index of the resulting laser direction.
 // 1). Incoming direction (index)
 // 2). Piece type (-2)
-// 3). Piece orientation (-1)
-// A value of zero = death
+// 3). Piece orientation
+// Can take the special Dead or Absorbed values defined above.
 const int Reflections[4][5][4] = {
     {
-        { 0, 0, Absorbed, 0 },
-        { 0, Directions[1], Directions[3], 0 },
-        { Directions[3], Directions[1], Directions[3], Directions[1] },
-        { 0, 0, 0, 0},
+        { Dead, Dead, Absorbed, Dead },            // Anubis.
+        { Dead, 1, 3, Dead },                      // Pyramid.
+        { 3, 1, 3, 1 },                            // Scarab.
+        { Dead, Dead, Dead, Dead},                 // Pharaoh.
+        { Absorbed, Absorbed, Absorbed, Absorbed } // Sphinx.
+    },
+    {
+        { Dead, Dead, Dead, Absorbed },
+        { Dead, Dead, 2, 0 },
+        { 2, 0, 2, 0 },
+        { Dead, Dead, Dead, Dead},
         { Absorbed, Absorbed, Absorbed, Absorbed }
     },
     {
-        { 0, 0, 0, Absorbed },
-        { 0, 0, Directions[2], Directions[0] },
-        { Directions[2], Directions[0], Directions[2], Directions[0] },
-        { 0, 0, 0, 0},
+        { Absorbed, Dead, Dead, Dead },
+        { 1, Dead, Dead, 3 },
+        { 1, 3, 1, 3 },
+        { Dead, Dead, Dead, Dead},
         { Absorbed, Absorbed, Absorbed, Absorbed }
     },
     {
-        { Absorbed, 0, 0, 0 },
-        { Directions[1], 0, 0, Directions[3] },
-        { Directions[1], Directions[3], Directions[1], Directions[3] },
-        { 0, 0, 0, 0},
-        { Absorbed, Absorbed, Absorbed, Absorbed }
-    },
-    {
-        { 0, Absorbed, 0, 0 },
-        { Directions[0], Directions[2], 0, 0 },
-        { Directions[0], Directions[2], Directions[0], Directions[2] },
-        { 0, 0, 0, 0},
+        { Dead, Absorbed, Dead, Dead },
+        { 0, 2, Dead, Dead },
+        { 0, 2, 0, 2 },
+        { Dead, Dead, Dead, Dead},
         { Absorbed, Absorbed, Absorbed, Absorbed }
     }
 };

@@ -15,6 +15,8 @@ public:
     Board(const Board&);
     Board(const std::string&);
 
+    int Compare(const Board&);
+
     // Accessors.
     inline Player PlayerToMove() const { return _playerToMove; }
     inline Square Get(int i) const { return _board[i]; }
@@ -35,8 +37,9 @@ private:
     // Move list.
     const Move* _moves[MaxGameLength];
 
-    // Cache the capture square.
+    // Cache the capture square and location so that it can be restored.
     Square _captureSquare[MaxGameLength];
+    int _captureLocation[MaxGameLength];
 
     void Init();
 

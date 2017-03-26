@@ -30,6 +30,7 @@ inline Square Rotate(Square s, int rotation)
 {
     int o = GetOrientation(s);
     o = (o + rotation) % 4;
+    if (o < 0) o += 4;
     return (s & 0x1F) + (o << 5);
 }
 

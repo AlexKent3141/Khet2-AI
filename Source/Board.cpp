@@ -23,9 +23,24 @@ Board::Board(const std::string& ks)
     FromString(ks);
 }
 
+// If there is no difference then return zero. 
+// If a square is different then the index of the square + 1 is returned.
+// If the player is different then return BoardArea + 1.
+int Board::Compare(const Board& other)
+{
+    int ret = 0;
+
+    // Compare the board squares.
+    while (ret++ < BoardArea + 1 && _board[ret - 1] == other._board[ret - 1]);
+
+    // If there is no difference in squares then compare the player to move.
+    return ret <= BoardArea ? ret : (_playerToMove == other._playerToMove ? 0 : ret);
+}
+
 void Board::Init()
 {
     memset(_captureSquare, Empty, MaxGameLength*sizeof(Square));
+    memset(_captureLocation, -1, MaxGameLength*sizeof(int));
 }
 
 void Board::MakeMove(Move const* const move)
@@ -42,6 +57,7 @@ void Board::MakeMove(Move const* const move)
     _board[start] = _board[end];
     _board[end] = movingPiece;
 
+    // Check whether pieces are captured.
     FireLaser();
 
     _playerToMove = _playerToMove == Player::Silver ? Player::Red : Player::Silver;
@@ -53,6 +69,12 @@ void Board::MakeMove(Move const* const move)
 void Board::UndoMove()
 {
     Move const* const move = _moves[--_moveNumber];
+
+    // Restore any captured pieces.
+    if (_captureSquare[_moveNumber] != Empty)
+    {
+        _board[_captureLocation[_moveNumber]] = _captureSquare[_moveNumber];
+    }
 
     int start = move->Start();
     int end = move->End();
@@ -67,12 +89,6 @@ void Board::UndoMove()
     _board[end] = _board[start];
     _board[start] = movedPiece;
 
-    // Restore any captured pieces.
-    if (_captureSquare[_moveNumber] != Empty)
-    {
-        _board[end] = _captureSquare[_moveNumber];
-    }
-
     _playerToMove = _playerToMove == Player::Silver ? Player::Red : Player::Silver;
 }
 
@@ -80,12 +96,14 @@ void Board::FireLaser()
 {
     // Find the starting location and direction for the laser beam.
     int loc = Sphinx[(int)_playerToMove];
-    int o = GetOrientation(_board[loc]);
-    int dir = Directions[o - 1];
+    int dirIndex = GetOrientation(_board[loc]);
+    int dir;
     Square dest = Empty;
     Piece p;
-    while (dest != OffBoard && dir != 0 && dir != Absorbed)
+    while (dest != OffBoard && dirIndex >= 0)
     {
+        dir = Directions[dirIndex];
+
         // Take a step with the laser beam.
         loc += dir;
 
@@ -94,14 +112,21 @@ void Board::FireLaser()
         if (IsPiece(dest))
         {
             p = GetPiece(dest);
-            int po = GetOrientation(dest);
-            dir = Reflections[o - 1][(int)p - 2][po - 1];
-            o = po;
+            dirIndex = Reflections[dirIndex][(int)p - 2][GetOrientation(dest)];
         }
     }
 
     // Was there a capture?
-    _captureSquare[_moveNumber] = dir == 0 ? dest : Empty;
+    if (dirIndex == Dead)
+    {
+        _captureSquare[_moveNumber] = dest;
+        _captureLocation[_moveNumber] = loc;
+        _board[loc] = Empty;
+    }
+    else
+    {
+        _captureSquare[_moveNumber] = Empty;
+    }
 }
 
 // Serialise the board to a human-readable string.
@@ -195,7 +220,7 @@ void Board::ParseLine(int index, const std::string& line)
         else if (havePiece)
         {
             // Orientation argument for the piece.
-            orientation = (Orientation)(line[i] - '0');
+            orientation = (Orientation)(line[i] - 1 - '0');
             _board[rowStart + rowIndex++] = MakeSquare(player, piece, orientation);
             havePiece = false;
         }
