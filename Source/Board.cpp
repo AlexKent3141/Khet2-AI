@@ -97,9 +97,8 @@ void Board::FireLaser()
     // Find the starting location and direction for the laser beam.
     int loc = Sphinx[(int)_playerToMove];
     int dirIndex = GetOrientation(_board[loc]);
-    int dir;
+    int dir, p;
     Square dest = Empty;
-    Piece p;
     while (dest != OffBoard && dirIndex >= 0)
     {
         dir = Directions[dirIndex];
@@ -111,21 +110,18 @@ void Board::FireLaser()
         dest = _board[loc];
         if (IsPiece(dest))
         {
-            p = GetPiece(dest);
-            dirIndex = Reflections[dirIndex][(int)p - 2][GetOrientation(dest)];
+            p = (int)GetPiece(dest);
+            dirIndex = Reflections[dirIndex][p - 2][GetOrientation(dest)];
         }
     }
 
     // Was there a capture?
+    _captureSquare[_moveNumber] = Empty;
     if (dirIndex == Dead)
     {
         _captureSquare[_moveNumber] = dest;
         _captureLocation[_moveNumber] = loc;
         _board[loc] = Empty;
-    }
-    else
-    {
-        _captureSquare[_moveNumber] = Empty;
     }
 }
 
@@ -266,17 +262,6 @@ char Board::CharFromPiece(Player player, Piece piece) const
     else if (piece == Piece::Sphinx)
         c = 'x'; 
 
-    if (player == Player::Silver)
-        c = toupper(c);
-
-    return c;
+    return player == Player::Silver ? toupper(c) : c;
 }
-
-
-
-
-
-
-
-
 
