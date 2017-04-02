@@ -30,6 +30,7 @@ public:
 private:
     Player _playerToMove;
     int _moveNumber = 0;
+    uint64_t _hash = 0;
 
     // Mailbox style storage is used with one layer of padding.
     Square _board[BoardArea];

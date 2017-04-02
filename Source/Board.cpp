@@ -1,5 +1,6 @@
 #include "Board.h"
 #include "SquareHelpers.h"
+#include "Zobrist.h"
 #include "Utils.h"
 #include <cctype>
 #include <cstring>
@@ -14,6 +15,7 @@ Board::Board(const Board& other)
 {
     Init();
     _playerToMove = other._playerToMove;
+    _hash = other._hash;
     memcpy(_board, other._board, BoardArea*sizeof(Square));
 }
 
@@ -24,8 +26,7 @@ Board::Board(const std::string& ks)
 }
 
 // If there is no difference then return zero. 
-// If a square is different then the index of the square + 1 is returned.
-// If the player is different then return BoardArea + 1.
+// The comparison takes into account the squares, the player to move and the hash.
 int Board::Compare(const Board& other)
 {
     int ret = 0;
@@ -33,8 +34,12 @@ int Board::Compare(const Board& other)
     // Compare the board squares.
     while (ret++ < BoardArea + 1 && _board[ret - 1] == other._board[ret - 1]);
 
-    // If there is no difference in squares then compare the player to move.
-    return ret <= BoardArea ? ret : (_playerToMove == other._playerToMove ? 0 : ret);
+    if (ret > BoardArea)
+    {
+        ret = _playerToMove == other._playerToMove && _hash != other._hash ?  -1 : 0;
+    }
+
+    return ret;
 }
 
 void Board::Init()
@@ -45,10 +50,14 @@ void Board::Init()
 
 void Board::MakeMove(Move const* const move)
 {
+    auto z = Zobrist::Instance();
+
     int start = move->Start();
     int end = move->End();
 
     Square movingPiece = _board[start];
+    _hash ^= z->Key(movingPiece, start);
+
     if (move->Rotation() != 0)
     {
         movingPiece = Rotate(movingPiece, move->Rotation());
@@ -56,6 +65,7 @@ void Board::MakeMove(Move const* const move)
 
     _board[start] = _board[end];
     _board[end] = movingPiece;
+    _hash ^= z->Key(movingPiece, end);
 
     // Check whether pieces are captured.
     FireLaser();
@@ -68,26 +78,32 @@ void Board::MakeMove(Move const* const move)
 // Note: The move that needs to be undone should already be cached.
 void Board::UndoMove()
 {
+    auto z = Zobrist::Instance();
     Move const* const move = _moves[--_moveNumber];
 
     // Restore any captured pieces.
-    if (_captureSquare[_moveNumber] != Empty)
+    Square cap = _captureSquare[_moveNumber];
+    int capLoc = _captureLocation[_moveNumber];
+    if (cap != Empty)
     {
-        _board[_captureLocation[_moveNumber]] = _captureSquare[_moveNumber];
+        _board[capLoc] = cap;
+        _hash ^= z->Key(cap, capLoc);
     }
 
     int start = move->Start();
     int end = move->End();
     Square movedPiece = _board[end];
+    _hash ^= z->Key(movedPiece, end);
 
-    // Reverse the rotation.
     if (move->Rotation() != 0)
     {
+        // Reverse the rotation.
         movedPiece = Rotate(movedPiece, -1*move->Rotation());
     }
 
     _board[end] = _board[start];
     _board[start] = movedPiece;
+    _hash ^= z->Key(movedPiece, start);
 
     _playerToMove = _playerToMove == Player::Silver ? Player::Red : Player::Silver;
 }
@@ -122,6 +138,7 @@ void Board::FireLaser()
         _captureSquare[_moveNumber] = dest;
         _captureLocation[_moveNumber] = loc;
         _board[loc] = Empty;
+        _hash ^= Zobrist::Instance()->Key(dest, loc);
     }
 }
 
@@ -187,43 +204,31 @@ void Board::ParseLine(int index, const std::string& line)
 {
     // The zero-th index is the back rank.
     // Also need to take into account padding.
-    int rowIndex = 1;
-    int rowStart = BoardWidth * (BoardHeight - index - 2);
+    int boardIndex = BoardWidth * (BoardHeight - index - 2) + 1;
 
     // Fill the line with empty initially.
-    memset(&_board[rowStart + rowIndex], Empty, (BoardWidth - 2)*sizeof(Square));
+    memset(&_board[boardIndex], Empty, (BoardWidth - 2)*sizeof(Square));
 
-    bool havePiece = false;
-    Piece piece;
-    Player player;
-    Orientation orientation;
-
+    auto z = Zobrist::Instance();
     for (size_t i = 0; i < line.size(); i++)
     {
         if (isalpha(line[i]))
         {
             // Specifying a piece.
-            havePiece = true;
-            player = isupper(line[i]) != 0 ? Player::Silver : Player::Red;
-            piece = PieceFromChar(line[i]);
+            Player player = isupper(line[i]) ? Player::Silver : Player::Red;
+            Piece piece = PieceFromChar(line[i]);
 
-            if (piece == Piece::Pharaoh)
-            {
-                _board[rowStart + rowIndex++] = MakeSquare(player, piece, Orientation::Up);
-                havePiece = false;
-            }
-        }
-        else if (havePiece)
-        {
-            // Orientation argument for the piece.
-            orientation = (Orientation)(line[i] - 1 - '0');
-            _board[rowStart + rowIndex++] = MakeSquare(player, piece, orientation);
-            havePiece = false;
+            Orientation orientation = piece == Piece::Pharaoh ? 
+                Orientation::Up : (Orientation)(line[++i] - 1 - '0');
+
+            Square sq = MakeSquare(player, piece, orientation);
+            _hash ^= z->Key(sq, boardIndex);
+            _board[boardIndex++] = sq;
         }
         else
         {
             // A gap between pieces.
-            rowIndex += (line[i] - '0');
+            boardIndex += (line[i] - '0');
         }
     }
 }
