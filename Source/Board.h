@@ -25,12 +25,14 @@ public:
     void MakeMove(Move const* const);
     void UndoMove();
 
+    bool IsDraw() const;
+
     std::string ToString() const;
     
 private:
     Player _playerToMove;
     int _moveNumber = 0;
-    uint64_t _hash = 0;
+    uint64_t _hashes[MaxGameLength];
 
     // Mailbox style storage is used with one layer of padding.
     Square _board[BoardArea];
@@ -44,7 +46,7 @@ private:
 
     void Init();
 
-    void FireLaser();
+    void FireLaser(uint64_t&);
 
     void FromString(const std::string&);
 

@@ -15,7 +15,7 @@ Board::Board(const Board& other)
 {
     Init();
     _playerToMove = other._playerToMove;
-    _hash = other._hash;
+    memcpy(_hashes, other._hashes, MaxGameLength*sizeof(uint64_t));
     memcpy(_board, other._board, BoardArea*sizeof(Square));
 }
 
@@ -36,7 +36,8 @@ int Board::Compare(const Board& other)
 
     if (ret > BoardArea)
     {
-        ret = _playerToMove == other._playerToMove && _hash != other._hash ?  -1 : 0;
+        ret = _playerToMove == other._playerToMove && 
+            _hashes[_moveNumber] != other._hashes[_moveNumber] ?  -1 : 0;
     }
 
     return ret;
@@ -44,6 +45,7 @@ int Board::Compare(const Board& other)
 
 void Board::Init()
 {
+    memset(_hashes, 0, MaxGameLength*sizeof(uint64_t));
     memset(_captureSquare, Empty, MaxGameLength*sizeof(Square));
     memset(_captureLocation, -1, MaxGameLength*sizeof(int));
 }
@@ -51,12 +53,13 @@ void Board::Init()
 void Board::MakeMove(Move const* const move)
 {
     auto z = Zobrist::Instance();
+    uint64_t hash = _hashes[_moveNumber];
 
     int start = move->Start();
     int end = move->End();
 
     Square movingPiece = _board[start];
-    _hash ^= z->Key(movingPiece, start);
+    hash ^= z->Key(movingPiece, start);
 
     if (move->Rotation() != 0)
     {
@@ -65,35 +68,36 @@ void Board::MakeMove(Move const* const move)
 
     _board[start] = _board[end];
     _board[end] = movingPiece;
-    _hash ^= z->Key(movingPiece, end);
+    hash ^= z->Key(movingPiece, end);
 
     // Check whether pieces are captured.
-    FireLaser();
+    ++_moveNumber;
+    FireLaser(hash);
 
     _playerToMove = _playerToMove == Player::Silver ? Player::Red : Player::Silver;
 
-    _moves[_moveNumber++] = move;
+    _moves[_moveNumber] = move;
+    _hashes[_moveNumber] = hash;
 }
 
 // Note: The move that needs to be undone should already be cached.
 void Board::UndoMove()
 {
-    auto z = Zobrist::Instance();
-    Move const* const move = _moves[--_moveNumber];
+    Move const* const move = _moves[_moveNumber];
 
     // Restore any captured pieces.
     Square cap = _captureSquare[_moveNumber];
     int capLoc = _captureLocation[_moveNumber];
+
+    --_moveNumber;
     if (cap != Empty)
     {
         _board[capLoc] = cap;
-        _hash ^= z->Key(cap, capLoc);
     }
 
     int start = move->Start();
     int end = move->End();
     Square movedPiece = _board[end];
-    _hash ^= z->Key(movedPiece, end);
 
     if (move->Rotation() != 0)
     {
@@ -103,12 +107,37 @@ void Board::UndoMove()
 
     _board[end] = _board[start];
     _board[start] = movedPiece;
-    _hash ^= z->Key(movedPiece, start);
 
     _playerToMove = _playerToMove == Player::Silver ? Player::Red : Player::Silver;
 }
 
-void Board::FireLaser()
+// Check whether the position is drawn by repetition or inactivity.
+// Need to loop backwards through the moves until the last capture/inactivity limit is reached.
+bool Board::IsDraw() const
+{
+    bool isDraw = false;
+    int numRepeats = 1;
+    uint64_t repeatHash = _hashes[_moveNumber];
+    int captureMoveLimit = std::max(0, _moveNumber - TimeSinceCaptureLimit - 1);
+    int i;
+    for (i = _moveNumber - 1; i >= captureMoveLimit && !isDraw && _captureSquare[i] == Empty; i--)
+    {
+        if (_hashes[i] == repeatHash)
+        {
+            ++numRepeats;
+            isDraw = numRepeats == RepetitionLimit;
+        }
+    }
+    
+    if (i < captureMoveLimit)
+    {
+        isDraw = true;
+    }
+
+    return isDraw;
+}
+
+void Board::FireLaser(uint64_t& hash)
 {
     // Find the starting location and direction for the laser beam.
     int loc = Sphinx[(int)_playerToMove];
@@ -138,7 +167,7 @@ void Board::FireLaser()
         _captureSquare[_moveNumber] = dest;
         _captureLocation[_moveNumber] = loc;
         _board[loc] = Empty;
-        _hash ^= Zobrist::Instance()->Key(dest, loc);
+        hash ^= Zobrist::Instance()->Key(dest, loc);
     }
 }
 
@@ -210,6 +239,7 @@ void Board::ParseLine(int index, const std::string& line)
     memset(&_board[boardIndex], Empty, (BoardWidth - 2)*sizeof(Square));
 
     auto z = Zobrist::Instance();
+    uint64_t hash = 0;
     for (size_t i = 0; i < line.size(); i++)
     {
         if (isalpha(line[i]))
@@ -222,7 +252,7 @@ void Board::ParseLine(int index, const std::string& line)
                 Orientation::Up : (Orientation)(line[++i] - 1 - '0');
 
             Square sq = MakeSquare(player, piece, orientation);
-            _hash ^= z->Key(sq, boardIndex);
+            hash ^= z->Key(sq, boardIndex);
             _board[boardIndex++] = sq;
         }
         else
@@ -231,6 +261,8 @@ void Board::ParseLine(int index, const std::string& line)
             boardIndex += (line[i] - '0');
         }
     }
+
+    _hashes[0] = hash;
 }
 
 Piece Board::PieceFromChar(char c) const

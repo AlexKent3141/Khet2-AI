@@ -183,9 +183,3 @@ Move* MoveGenerator::NextMoveForSphinx()
     return move;
 }
 
-
-
-
-
-
-
