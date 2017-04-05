@@ -20,6 +20,7 @@ public:
     // Accessors.
     inline Player PlayerToMove() const { return _playerToMove; }
     inline Square Get(int i) const { return _board[i]; }
+    inline bool IsCheckmate() const { return _checkmate; }
 
     // Making/unmaking moves.
     void MakeMove(Move const* const);
@@ -31,6 +32,7 @@ public:
     
 private:
     Player _playerToMove;
+    bool _checkmate = false;
     int _moveNumber = 0;
     uint64_t _hashes[MaxGameLength];
 

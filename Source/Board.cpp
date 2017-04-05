@@ -108,6 +108,7 @@ void Board::UndoMove()
     _board[end] = _board[start];
     _board[start] = movedPiece;
 
+    _checkmate = false;
     _playerToMove = _playerToMove == Player::Silver ? Player::Red : Player::Silver;
 }
 
@@ -167,6 +168,7 @@ void Board::FireLaser(uint64_t& hash)
         _captureSquare[_moveNumber] = dest;
         _captureLocation[_moveNumber] = loc;
         _board[loc] = Empty;
+        _checkmate = p == (int)Piece::Pharaoh;
         hash ^= Zobrist::Instance()->Key(dest, loc);
     }
 }

@@ -5,7 +5,9 @@ MoveGenerator::MoveGenerator(const Board& board)
 {
     _board = new Board(board);
     _player = _board->PlayerToMove();
-    _hasPieces = NextPiece();
+    
+    // Check whether the board position is terminal.
+    _hasPieces = board.IsCheckmate() || board.IsDraw() ? false : NextPiece();
 }
 
 MoveGenerator::~MoveGenerator()
