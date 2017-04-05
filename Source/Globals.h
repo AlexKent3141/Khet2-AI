@@ -13,7 +13,7 @@ const int NumPiecesPerPlayer = 13;
 
 // Rules constants.
 const int RepetitionLimit = 3;
-const int TimeSinceCaptureLimit = 50;
+const int TimeSinceCaptureLimit = 100; // 100 plys = 50 moves each.
 
 // Can compute an upper-bound for the maximum game length.
 // Assume that one piece is captured per TimeSinceCaptureLimit of moves.

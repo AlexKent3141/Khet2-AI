@@ -9,6 +9,10 @@ public:
     {
     }
 
+    Move(const Move& other) : _start(other._start), _end(other._end), _rotation(other._rotation)
+    {
+    }
+
     inline int Start() const { return _start; }
     inline int End() const { return _end; }
     inline int Rotation() const { return _rotation; }

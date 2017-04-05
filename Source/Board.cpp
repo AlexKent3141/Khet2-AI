@@ -117,22 +117,20 @@ void Board::UndoMove()
 bool Board::IsDraw() const
 {
     bool isDraw = false;
-    int numRepeats = 1;
+    int i, numRepeats = 1, movesWithoutCapture = 0;
     uint64_t repeatHash = _hashes[_moveNumber];
-    int captureMoveLimit = std::max(0, _moveNumber - TimeSinceCaptureLimit - 1);
-    int i;
-    for (i = _moveNumber - 1; i >= captureMoveLimit && !isDraw && _captureSquare[i] == Empty; i--)
+    for (i = _moveNumber - 1; i >= 0 && !isDraw && _captureSquare[i] == Empty; i--)
     {
         if (_hashes[i] == repeatHash)
         {
             ++numRepeats;
             isDraw = numRepeats == RepetitionLimit;
         }
-    }
-    
-    if (i < captureMoveLimit)
-    {
-        isDraw = true;
+        
+        if (++movesWithoutCapture >= TimeSinceCaptureLimit)
+        {
+            isDraw = true;
+        }
     }
 
     return isDraw;
