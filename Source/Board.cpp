@@ -2,6 +2,7 @@
 #include "SquareHelpers.h"
 #include "Zobrist.h"
 #include "Utils.h"
+#include <cassert>
 #include <cctype>
 #include <cstring>
 
@@ -48,10 +49,13 @@ void Board::Init()
     memset(_hashes, 0, MaxGameLength*sizeof(uint64_t));
     memset(_captureSquare, Empty, MaxGameLength*sizeof(Square));
     memset(_captureLocation, -1, MaxGameLength*sizeof(int));
+    memset(_movesWithoutCapture, 0, MaxGameLength*sizeof(int));
 }
 
 void Board::MakeMove(Move const* const move)
 {
+    assert(!_drawn && !_checkmate);
+
     auto z = Zobrist::Instance();
     uint64_t hash = _hashes[_moveNumber];
 
@@ -71,13 +75,16 @@ void Board::MakeMove(Move const* const move)
     hash ^= z->Key(movingPiece, end);
 
     // Check whether pieces are captured.
+    int prevMovesWithoutCapture = _movesWithoutCapture[_moveNumber];
     ++_moveNumber;
-    FireLaser(hash);
+    _movesWithoutCapture[_moveNumber] = FireLaser(hash) ? 0 : prevMovesWithoutCapture + 1;
 
     _playerToMove = _playerToMove == Player::Silver ? Player::Red : Player::Silver;
 
     _moves[_moveNumber] = move;
     _hashes[_moveNumber] = hash;
+
+    CheckForDraw();
 }
 
 // Note: The move that needs to be undone should already be cached.
@@ -109,34 +116,31 @@ void Board::UndoMove()
     _board[start] = movedPiece;
 
     _checkmate = false;
+    _drawn = false;
     _playerToMove = _playerToMove == Player::Silver ? Player::Red : Player::Silver;
 }
 
-// Check whether the position is drawn by repetition or inactivity.
-// Need to loop backwards through the moves until the last capture/inactivity limit is reached.
-bool Board::IsDraw() const
+// Check whether the game is now drawn.
+void Board::CheckForDraw()
 {
-    bool isDraw = false;
-    int i, numRepeats = 1, movesWithoutCapture = 0;
-    uint64_t repeatHash = _hashes[_moveNumber];
-    for (i = _moveNumber - 1; i >= 0 && !isDraw && _captureSquare[i] == Empty; i--)
+    // Check for draw by inactivity.
+    int movesWithoutCapture = _movesWithoutCapture[_moveNumber];
+    _drawn = movesWithoutCapture >= TimeSinceCaptureLimit;
+    if (!_drawn)
     {
-        if (_hashes[i] == repeatHash)
+        // Check for draw by repetition.
+        uint64_t repeatHash = _hashes[_moveNumber];
+        int numRepeats = 1;
+        for (int m = 1; m < movesWithoutCapture && numRepeats < RepetitionLimit; m++)
         {
-            ++numRepeats;
-            isDraw = numRepeats == RepetitionLimit;
+            numRepeats += _hashes[_moveNumber-m] == repeatHash ? 1 : 0;
         }
-        
-        if (++movesWithoutCapture >= TimeSinceCaptureLimit)
-        {
-            isDraw = true;
-        }
-    }
 
-    return isDraw;
+        _drawn = numRepeats >= RepetitionLimit;
+    }
 }
 
-void Board::FireLaser(uint64_t& hash)
+bool Board::FireLaser(uint64_t& hash)
 {
     // Find the starting location and direction for the laser beam.
     int loc = Sphinx[(int)_playerToMove];
@@ -169,6 +173,8 @@ void Board::FireLaser(uint64_t& hash)
         _checkmate = p == (int)Piece::Pharaoh;
         hash ^= Zobrist::Instance()->Key(dest, loc);
     }
+
+    return dirIndex == Dead;
 }
 
 // Serialise the board to a human-readable string.

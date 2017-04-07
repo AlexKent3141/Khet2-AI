@@ -21,18 +21,17 @@ public:
     inline Player PlayerToMove() const { return _playerToMove; }
     inline Square Get(int i) const { return _board[i]; }
     inline bool IsCheckmate() const { return _checkmate; }
+    inline bool IsDraw() const { return _drawn; }
 
     // Making/unmaking moves.
     void MakeMove(Move const* const);
     void UndoMove();
 
-    bool IsDraw() const;
-
     std::string ToString() const;
     
 private:
     Player _playerToMove;
-    bool _checkmate = false;
+    bool _checkmate = false, _drawn = false;
     int _moveNumber = 0;
     uint64_t _hashes[MaxGameLength];
 
@@ -46,9 +45,14 @@ private:
     Square _captureSquare[MaxGameLength];
     int _captureLocation[MaxGameLength];
 
+    // Cache the number of moves since the last capture.
+    int _movesWithoutCapture[MaxGameLength];
+
     void Init();
 
-    void FireLaser(uint64_t&);
+    bool FireLaser(uint64_t&);
+
+    void CheckForDraw();
 
     void FromString(const std::string&);
 
