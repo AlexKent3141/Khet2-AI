@@ -2,6 +2,7 @@
 #define __EVALUATOR_H__
 
 #include "Board.h"
+#include "Globals.h"
 
 // This class contains methods that are used to evaluate a board position.
 class Evaluator
@@ -20,6 +21,9 @@ private:
 
     // The value of a single laserable square.
     const int LaserVal = 40;
+
+    // This value is above any achievable in the game normally.
+    const int CheckmateVal = 3*AnubisVal + 10*PyramidVal + BoardArea*LaserVal;
 
     // Check if the board is in a terminal state and score appropriately if so.
     bool TerminalScore(const Board&, int*) const;

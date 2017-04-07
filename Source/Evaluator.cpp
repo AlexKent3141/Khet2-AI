@@ -12,7 +12,15 @@ int Evaluator::operator()(const Board& board) const
 
 bool Evaluator::TerminalScore(const Board& board, int* score) const
 {
-    return false;
+    bool terminal = board.IsCheckmate() || board.IsDraw();
+    if (terminal)
+    {
+        *score = board.IsDraw() 
+            ? 0 
+            : CheckmateVal * (GetOwner(board.LastMoveCapture()) == Player::Silver ? 1 : -1);
+    }
+
+    return terminal;
 }
 
 int Evaluator::MaterialScore(const Board& board) const
