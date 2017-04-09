@@ -22,7 +22,6 @@ public:
     inline Square Get(int i) const { return _board[i]; }
     inline bool IsCheckmate() const { return _checkmate; }
     inline bool IsDraw() const { return _drawn; }
-    inline Square LastMoveCapture() const { return _captureSquare[_moveNumber]; }
 
     // Making/unmaking moves.
     void MakeMove(Move const* const);

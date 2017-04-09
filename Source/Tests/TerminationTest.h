@@ -3,6 +3,8 @@
 
 #include "TestBase.h"
 #include "../Board.h"
+#include "../EvalParams.h"
+#include "../Evaluator.h"
 #include "../Globals.h"
 #include "../Move.h"
 #include "../MoveGenerator.h"
@@ -38,6 +40,9 @@ private:
     // ensuring that each game terminates as expected.
     bool RunTerminationTest(const std::string& khetPos)
     {
+        EvalParams params;
+        Evaluator eval(params);
+
         bool success = true;
         const int NumTests = 1000;
         Move* move;
@@ -64,7 +69,26 @@ private:
             {
                 // Playout terminates successfully.
                 playoutLengthTotal += j;
-                numDraws += board.IsDraw() ? 1 : 0;
+
+                // Check that the correct terminal evaluation is given.
+                int e = eval(board);
+                bool isDraw = board.IsDraw();
+                if (isDraw)
+                {
+                    ++numDraws;
+                    success = e == 0;
+                }
+                else
+                {
+                    success = std::abs(e) == params.CheckmateVal();
+                }
+
+                if (!success)
+                {
+                    std::cout << "The wrong evaluation was given!" << std::endl;
+                    std::cout << "Game was drawn: " << isDraw << std::endl;
+                    std::cout << "Evaluation: " << e << std::endl;
+                }
             }
             else
             {

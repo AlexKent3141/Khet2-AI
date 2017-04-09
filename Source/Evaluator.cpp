@@ -2,6 +2,16 @@
 #include "Globals.h"
 #include "SquareHelpers.h"
 
+Evaluator::Evaluator()
+{
+    _params = EvalParams();
+}
+
+Evaluator::Evaluator(const EvalParams& params)
+{
+    _params = params;
+}
+
 int Evaluator::operator()(const Board& board) const
 {
     int terminalScore = 0;
@@ -17,7 +27,7 @@ bool Evaluator::TerminalScore(const Board& board, int* score) const
     {
         *score = board.IsDraw() 
             ? 0 
-            : CheckmateVal * (GetOwner(board.LastMoveCapture()) == Player::Silver ? 1 : -1);
+            : _params.CheckmateVal() * (board.PlayerToMove() == Player::Silver ? -1 : 1);
     }
 
     return terminal;
@@ -36,7 +46,7 @@ int Evaluator::MaterialScore(const Board& board) const
         {
             player = GetOwner(sq);
             piece = GetPiece(sq);
-            pieceVal = PieceVals[(int)piece];
+            pieceVal = _params.PieceVal(piece);
             eval += pieceVal * (player == Player::Silver ? 1 : -1);
         }
     }
@@ -46,8 +56,8 @@ int Evaluator::MaterialScore(const Board& board) const
 
 int Evaluator::LaserableScore(const Board& board) const
 {
-    return LaserVal * (LaserableSquares(Player::Silver, board) - 
-                       LaserableSquares(Player::Red, board));
+    return _params.LaserVal() * 
+        (LaserableSquares(Player::Silver, board) - LaserableSquares(Player::Red, board));
 }
 
 int Evaluator::LaserableSquares(Player player, const Board& board) const
