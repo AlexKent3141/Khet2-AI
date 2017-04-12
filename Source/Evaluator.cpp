@@ -27,7 +27,7 @@ bool Evaluator::TerminalScore(const Board& board, int* score) const
     {
         *score = board.IsDraw() 
             ? 0 
-            : _params.CheckmateVal() * (board.PlayerToMove() == Player::Silver ? -1 : 1);
+            : _params.CheckmateVal() * (GetOwner(board.LastCapture()) == Player::Silver ? -1 : 1);
     }
 
     return terminal;
