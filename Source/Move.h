@@ -5,12 +5,25 @@
 class Move
 {
 public:
+    Move() = default;
+
     Move(int start, int end, int rotation) : _start(start), _end(end), _rotation(rotation)
     {
     }
 
-    Move(const Move& other) : _start(other._start), _end(other._end), _rotation(other._rotation)
+    Move(const Move& other)
     {
+        CopyFrom(other);
+    }
+
+    Move& operator=(const Move& other)
+    {
+        if (this != &other)
+        {
+            CopyFrom(other);
+        }
+
+        return *this;
     }
 
     inline int Start() const { return _start; }
@@ -26,6 +39,13 @@ public:
 
 private:
     int _start, _end, _rotation;
+
+    void CopyFrom(const Move& other)
+    {
+        _start = other._start;
+        _end = other._end;
+        _rotation = other._rotation;
+    }
 
     std::string LocationToString(int loc) const
     {
