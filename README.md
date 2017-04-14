@@ -20,6 +20,6 @@ These may be subject to further tweaks once the AI can be tested fully.
 1) Decide on board representation *Done*
 2) Implement move generation (with basic testing framework) *Done*
 3) Implement make/unmake move functionality *Done*
-4) Implement basic AI (iterative deepening alpha-beta) *In Progress*
-5) Implement communications (see UCI protocol for chess)
+4) Implement basic AI (iterative deepening alpha-beta) *Done (simple case)*
+5) Implement communications (see UCI protocol for chess) *In Progress*
 6) ...
