@@ -1,10 +1,32 @@
 #include "Search.h"
+#include "Evaluator.h"
 #include "MoveGenerator.h"
+#include <cassert>
 #include <climits>
 
+// Iterative deepening framework.
 Move* Search::Start(Board& board, int depth, int& score)
 {
-    Move* bestMove = nullptr;
+    assert(depth > 0);
+
+    Move* bestMove = nullptr, *tempMove = nullptr;
+    int tempScore;
+    Evaluator eval;
+    for (int d = 1; d <= depth; d++)
+    {
+        if ((tempMove = AlphaBetaRoot(eval, board, d, tempScore)) != nullptr)
+        {
+            if (bestMove != nullptr)
+                delete bestMove;
+
+            bestMove = tempMove;
+            score = tempScore;
+        }
+        else
+        {
+            break;
+        }
+    }
 
     return bestMove;
 }
