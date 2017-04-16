@@ -1,0 +1,46 @@
+The UCI-like commands that I plan to support initially. All commands should be followed with a 
+newline character only - there should be no other leading or trailing white space.
+
+*** UI to engine ***
+
+- newgame
+    This indicates that the next position will be from a different game, so any existing caches
+    should be cleared.
+
+- position [khet string | standard | imhotep | dynasty] moves ...
+    Setup a position defined by a starting position followed by a sequence of moves.
+
+- go
+    Start calculating on the specified position. There are a few parameters, one of which will be 
+    specified with this command:
+    - depth X
+        Search to the specified depth.
+    - movetime X
+        Search for exactly X milliseconds.
+    - infinite
+        Search until a "stop" command is received.
+
+- stop
+    Stop calculating as soon as possible.
+
+- quit
+    Quit the program as soon as possible.
+
+*** Engine to UI ***
+
+- id
+    Gets the name of the engine.
+
+- bestmove X
+    The engine has finished searching and returns the best move.
+
+- info
+    The engine wants to send info to the UI. There are a few possible info-types:
+    - depth X
+        Search depth in plies.
+    - time X
+        The time that has been spent searching in milliseconds.
+    - score X
+        The score of the position that is being searched.
+    - string X
+        A string that the engine wants to display. Could contain debug info.
