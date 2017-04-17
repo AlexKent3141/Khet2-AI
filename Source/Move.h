@@ -1,6 +1,8 @@
 #ifndef __MOVE_H__
 #define __MOVE_H__
 
+#include <cassert>
+
 // This class describes a move.
 class Move
 {
@@ -24,6 +26,15 @@ public:
         }
 
         return *this;
+    }
+
+    Move(const std::string& s)
+    {
+        assert(s.size() >= 3);
+        _start = StringToLocation(s[0], s[1]);
+        _end = s.size() == 3 ? _start : StringToLocation(s[2], s[3]);
+        if (_start != _end)
+            _rotation = s[2] == '+' ? 1 : -1;
     }
 
     inline int Start() const { return _start; }
@@ -51,6 +62,11 @@ private:
     {
         const std::string Files = "XabcdefghijX";
         return Files[loc % BoardWidth] + std::to_string(loc / BoardWidth);
+    }
+
+    int StringToLocation(char file, char rank)
+    {
+        return (rank - 96)*BoardWidth + (file - 47);
     }
 };
 

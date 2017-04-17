@@ -13,7 +13,11 @@ public:
     // Iterative deepening Minimax search.
     Move* Start(const SearchParams&, Board&, int&);
 
+    // Stop the current search.
+    void Stop();
+
 private:
+    bool _stopped;
     SearchParams _params;
     clock_t _startTime;
 

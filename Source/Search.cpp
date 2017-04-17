@@ -7,6 +7,7 @@
 // Iterative deepening framework.
 Move* Search::Start(const SearchParams& params, Board& board, int& score)
 {
+    _stopped = false;
     _params = params;
     _startTime = clock();
 
@@ -30,7 +31,7 @@ Move* Search::Start(const SearchParams& params, Board& board, int& score)
             keepSearching = false;
         }
 
-        if (_params.Depth && d >= _params.Depth)
+        if (_params.Depth() > 0 && d >= _params.Depth())
         {
             keepSearching = false;
         }
@@ -39,17 +40,22 @@ Move* Search::Start(const SearchParams& params, Board& board, int& score)
     return bestMove;
 }
 
+void Search::Stop()
+{
+    _stopped = true;
+}
+
 // Check whether there is still time remaining for this search.
 bool Search::CheckTime() const
 {
     bool hasTime = true;
-    if (!_params.Infinite && !_params.Depth)
+    if (!_params.Infinite() && _params.Depth() <= 0)
     {
         clock_t elapsed = 1000 * (double)(clock() - _startTime) / CLOCKS_PER_SEC;
-        hasTime = elapsed < _params.MoveTime;
+        hasTime = elapsed < _params.MoveTime();
     }
     
-    return hasTime;
+    return hasTime && !_stopped;
 }
 
 // Initial alpha-beta call which assesses the root nodes and returns the best move.
