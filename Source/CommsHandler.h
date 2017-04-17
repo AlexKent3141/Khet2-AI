@@ -14,7 +14,8 @@ private:
     Calculator _calculator;
     Board* _board = nullptr;
 
-    Board* CreatePosition(const std::vector<std::string>&);
+    Board* CreatePosition(const std::vector<std::string>&) const;
+    SearchParams* CreateSearchParameters(const std::vector<std::string>&) const;
 };
 
 #endif // __COMMS_HANDLER_H__

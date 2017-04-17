@@ -202,7 +202,7 @@ std::string Board::ToString() const
             else if (_board[i] == Empty)
             {
                 pieces += ".";
-                orientations += "0";
+                orientations += ".";
             }
             else
             {

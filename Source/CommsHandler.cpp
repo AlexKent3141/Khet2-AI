@@ -21,14 +21,13 @@ bool CommsHandler::Process(const std::string& message)
             delete _board;
 
         _board = CreatePosition(tokens);
-        std::cout << _board->ToString() << std::endl;
     }
     else if (messageType == "go")
     {
         assert(_board != nullptr);
-        SearchParams params;
-        params.Depth(4);
-        _calculator.Start(params, *_board);
+        SearchParams* params = CreateSearchParameters(tokens);
+        _calculator.Start(*params, *_board);
+        delete params;
     }
     else if (messageType == "stop")
     {
@@ -47,7 +46,7 @@ bool CommsHandler::Process(const std::string& message)
     return alive;
 }
 
-Board* CommsHandler::CreatePosition(const std::vector<std::string>& tokens)
+Board* CommsHandler::CreatePosition(const std::vector<std::string>& tokens) const
 {
     assert(tokens.size() > 1);
     Board* board = nullptr;
@@ -76,3 +75,28 @@ Board* CommsHandler::CreatePosition(const std::vector<std::string>& tokens)
     return board;
 }
 
+SearchParams* CommsHandler::CreateSearchParameters(const std::vector<std::string>& tokens) const
+{
+    assert(tokens.size() > 1);
+    SearchParams* params = new SearchParams();
+    std::string paramType = tokens[1];
+    if (paramType == "infinite")
+    {
+        params->Infinite(true);
+    }
+    else
+    {
+        assert(tokens.size() == 3);
+        int val = stoi(tokens[2]);
+        if (paramType == "movetime")
+        {
+            params->MoveTime(val);
+        }
+        else if (paramType == "depth")
+        {
+            params->Depth(val);
+        }
+    }
+
+    return params;
+}
