@@ -33,7 +33,7 @@ public:
         assert(s.size() >= 3);
         _start = StringToLocation(s[0], s[1]);
         _end = s.size() == 3 ? _start : StringToLocation(s[2], s[3]);
-        if (_start != _end)
+        if (_start == _end)
             _rotation = s[2] == '+' ? 1 : -1;
     }
 
@@ -66,7 +66,7 @@ private:
 
     int StringToLocation(char file, char rank)
     {
-        return (rank - 96)*BoardWidth + (file - 47);
+        return (rank - 48)*BoardWidth + (file - 96);
     }
 };
 
