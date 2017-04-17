@@ -22,10 +22,13 @@ private:
     clock_t _startTime;
 
     // Display an info string for the current search.
-    void Info(int, int) const;
+    void ScoreInfo(int, int) const;
+    void MateInfo(int) const;
 
     // Display the best move that was found.
     void BestMove(const Move* const) const;
+
+    clock_t TimeElapsed() const;
 
     // Check whether there is still time remaining for the search.
     bool CheckTime() const;

@@ -15,7 +15,10 @@ Move* Search::Start(const SearchParams& params, Board& board, int& score)
     Move* bestMove = nullptr, *tempMove = nullptr;
     int tempScore;
     bool keepSearching = true;
-    Evaluator eval;
+
+    // Use the default evaluator.
+    EvalParams evalParams;
+    Evaluator eval(evalParams);
     for (int d = 1; keepSearching; d++)
     {
         tempMove = AlphaBetaRoot(eval, board, d, tempScore);
@@ -27,7 +30,17 @@ Move* Search::Start(const SearchParams& params, Board& board, int& score)
             bestMove = tempMove;
             score = tempScore;
 
-            Info(d, score);
+            // Is this mate for either side?
+            if (abs(score) == evalParams.CheckmateVal())
+            {
+                int sign = score > 0 && board.PlayerToMove() == Player::Silver ? 1 : -1;
+                MateInfo(d*sign);
+                keepSearching = false;
+            }
+            else
+            {
+                ScoreInfo(d, score);
+            }
         }
         else
         {
@@ -50,13 +63,19 @@ void Search::Stop()
     _stopped = true;
 }
 
-void Search::Info(int depth, int score) const
+void Search::ScoreInfo(int depth, int score) const
 {
-    clock_t elapsed = 1000 * (double)(clock() - _startTime) / CLOCKS_PER_SEC;
     std::cout << "info"
-              << " time " << elapsed
+              << " time " << TimeElapsed() 
               << " depth " << depth
               << " score " << score << std::endl;
+}
+
+void Search::MateInfo(int pliesToMate) const
+{
+    std::cout << "info"
+              << " time " << TimeElapsed()
+              << " mate " << pliesToMate << std::endl;
 }
 
 void Search::BestMove(const Move* const move) const
@@ -67,14 +86,18 @@ void Search::BestMove(const Move* const move) const
     }
 }
 
+clock_t Search::TimeElapsed() const
+{
+    return 1000 * (double)(clock() - _startTime) / CLOCKS_PER_SEC;
+}
+
 // Check whether there is still time remaining for this search.
 bool Search::CheckTime() const
 {
     bool hasTime = true;
     if (!_params.Infinite() && _params.Depth() <= 0)
     {
-        clock_t elapsed = 1000 * (double)(clock() - _startTime) / CLOCKS_PER_SEC;
-        hasTime = elapsed < _params.MoveTime();
+        hasTime = TimeElapsed() < _params.MoveTime();
     }
     
     return hasTime && !_stopped;
