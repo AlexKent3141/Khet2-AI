@@ -1,8 +1,13 @@
 APP=khet
 CXXFLAGS=-Wall -std=c++11
+LDFLAGS=-lpthread
 
-build_all: main.o Utils.o Board.o MoveGenerator.o Evaluator.o Search.o Calculator.o CommsHandler.o
-	$(CXX) main.o Utils.o Board.o MoveGenerator.o Evaluator.o Search.o Calculator.o CommsHandler.o -o $(APP) -lpthread
+src=$(wildcard *.cpp)
+obj=$(src:.cpp=.o)
 
+build_all: $(obj)
+	$(CXX) $^ -o $(APP) $(LDFLAGS)
+
+.PHONY: clean
 clean:
-	rm -f *.o Tests/*.o $(APP)
+	rm -f $(obj) $(APP)
