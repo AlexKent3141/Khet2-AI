@@ -1,6 +1,7 @@
 #include "Search.h"
 #include "Evaluator.h"
 #include "MoveGenerator.h"
+#include <iostream>
 #include <cassert>
 #include <climits>
 
@@ -25,6 +26,8 @@ Move* Search::Start(const SearchParams& params, Board& board, int& score)
 
             bestMove = tempMove;
             score = tempScore;
+
+            Info(d, score);
         }
         else
         {
@@ -37,12 +40,31 @@ Move* Search::Start(const SearchParams& params, Board& board, int& score)
         }
     }
 
+    BestMove(bestMove);
+
     return bestMove;
 }
 
 void Search::Stop()
 {
     _stopped = true;
+}
+
+void Search::Info(int depth, int score) const
+{
+    clock_t elapsed = 1000 * (double)(clock() - _startTime) / CLOCKS_PER_SEC;
+    std::cout << "info"
+              << " time " << elapsed
+              << " depth " << depth
+              << " score " << score << std::endl;
+}
+
+void Search::BestMove(const Move* const move) const
+{
+    if (move != nullptr)
+    {
+        std::cout << "bestmove " << move->ToString() << std::endl;
+    }
 }
 
 // Check whether there is still time remaining for this search.

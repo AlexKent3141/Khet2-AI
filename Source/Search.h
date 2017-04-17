@@ -21,6 +21,12 @@ private:
     SearchParams _params;
     clock_t _startTime;
 
+    // Display an info string for the current search.
+    void Info(int, int) const;
+
+    // Display the best move that was found.
+    void BestMove(const Move* const) const;
+
     // Check whether there is still time remaining for the search.
     bool CheckTime() const;
 
