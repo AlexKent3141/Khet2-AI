@@ -6,12 +6,6 @@
 #include <cctype>
 #include <cstring>
 
-Board::Board()
-{
-    Init();
-    FromString(Standard);
-}
-
 Board::Board(const Board& other)
 {
     Init();

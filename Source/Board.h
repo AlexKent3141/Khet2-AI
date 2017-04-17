@@ -11,7 +11,7 @@
 class Board
 {
 public:
-    Board();
+    Board() = delete;
     Board(const Board&);
     Board(const std::string&);
 

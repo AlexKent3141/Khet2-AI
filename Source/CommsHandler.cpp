@@ -1,5 +1,4 @@
 #include "CommsHandler.h"
-#include "Globals.h"
 #include "Utils.h"
 #include <cassert>
 #include <iostream>
@@ -52,9 +51,11 @@ Board* CommsHandler::CreatePosition(const std::vector<std::string>& tokens) cons
     Board* board = nullptr;
     size_t movesIndex = 2;
     if (tokens[1] == "standard")
-    {
         board = new Board(Standard);
-    }
+    else if (tokens[1] == "dynasty")
+        board = new Board(Dynasty);
+    else if (tokens[1] == "imhotep")
+        board = new Board(Imhotep);
     else
     {
         // It's a Khet string.
