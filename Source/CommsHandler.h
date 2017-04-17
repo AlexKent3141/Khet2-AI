@@ -8,6 +8,7 @@
 class CommsHandler
 {
 public:
+    ~CommsHandler();
     bool Process(const std::string&);
 
 private:

@@ -3,6 +3,12 @@
 #include <cassert>
 #include <iostream>
 
+CommsHandler::~CommsHandler()
+{
+    if (_board != nullptr)
+        delete _board;
+}
+
 bool CommsHandler::Process(const std::string& message)
 {
     bool alive = true;

@@ -115,6 +115,9 @@ Move* Search::AlphaBetaRoot(const Evaluator& eval, Board& board, int depth, int&
         }
     }
 
+    // Adjust the score so that it's from silver's perspective.
+    score *= sign;
+
     return bestMove;
 }
 
