@@ -33,6 +33,7 @@ public:
         assert(s.size() >= 3);
         _start = StringToLocation(s[0], s[1]);
         _end = s.size() == 3 ? _start : StringToLocation(s[2], s[3]);
+        _rotation = 0;
         if (_start == _end)
             _rotation = s[2] == '+' ? 1 : -1;
     }
