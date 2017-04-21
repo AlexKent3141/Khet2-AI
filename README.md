@@ -1,5 +1,5 @@
 # Khet2-AI
-AI program which plays Khet 2.0.
+AI program which plays Khet 2.0. ([It's Chess, with frickin' laser beams!](https://www.youtube.com/watch?v=dUGPyvyUxnM))
 
 Khet 2.0 is an interesting two-player board game where each player tries to position their pieces (some of which have reflective sides) so that when they fire their laser the opponent's Pharaoh is hit.
 
