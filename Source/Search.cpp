@@ -8,6 +8,8 @@
 // Iterative deepening framework.
 Move* Search::Start(const SearchParams& params, Board& board, int& score)
 {
+    const int MaxDepth = 100;
+
     _stopped = false;
     _params = params;
     _startTime = clock();
@@ -19,10 +21,11 @@ Move* Search::Start(const SearchParams& params, Board& board, int& score)
     // Use the default evaluator.
     EvalParams evalParams;
     Evaluator eval(evalParams);
-    for (int d = 1; keepSearching; d++)
+    for (int d = 1; keepSearching && d <= MaxDepth; d++)
     {
         tempMove = AlphaBetaRoot(eval, board, d, tempScore);
-        if (CheckTime())
+        keepSearching = CheckTime();
+        if (keepSearching)
         {
             if (bestMove != nullptr)
                 delete bestMove;
@@ -41,15 +44,11 @@ Move* Search::Start(const SearchParams& params, Board& board, int& score)
             {
                 ScoreInfo(d, score);
             }
-        }
-        else
-        {
-            keepSearching = false;
-        }
 
-        if (_params.Depth() > 0 && d >= _params.Depth())
-        {
-            keepSearching = false;
+            if (_params.Depth() > 0 && d >= _params.Depth())
+            {
+                keepSearching = false;
+            }
         }
     }
 
@@ -80,10 +79,8 @@ void Search::MateInfo(int pliesToMate) const
 
 void Search::BestMove(const Move* const move) const
 {
-    if (move != nullptr)
-    {
-        std::cout << "bestmove " << move->ToString() << std::endl;
-    }
+    std::string m = move != nullptr ? move->ToString() : "none";
+    std::cout << "bestmove " << m << std::endl;
 }
 
 clock_t Search::TimeElapsed() const
