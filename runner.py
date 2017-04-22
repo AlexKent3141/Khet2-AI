@@ -5,13 +5,20 @@ class AIProcess:
     def __init__(self, ai_path):
         self.path = ai_path
         self.proc = None
-        self.zeroes = 0
-        self.latest_eval = 0
-        self.moves = ""
+        self.new_game()
 
     def start(self):
         self.proc = pexpect.spawn(self.path)
         return self.proc != None
+
+    def new_game(self):
+        if self.proc:
+            self.proc.sendline("newgame")
+        self.zeroes = 0
+        self.latest_eval = 0
+        self.moves = ""
+        self.no_moves_available = False
+        self.mate_detected = False
 
     def quit(self):
         self.proc.sendline("stop")
@@ -19,6 +26,9 @@ class AIProcess:
 
     def add_move(self, move):
         self.moves += move + " "
+
+    def is_likely_draw(self):
+        return self.zeroes > 2
 
     def search(self, time):
         self.proc.sendline("position standard " + self.moves)
@@ -37,6 +47,7 @@ class AIProcess:
                     i = tokens.index("mate")
                     score_type = "mate"
                     current_eval = int(tokens[i+1])
+                    self.mate_detected = True
             elif line.startswith("bestmove"):
                 tokens = line.split(" ")
                 best_move = tokens[1]
@@ -48,6 +59,7 @@ class AIProcess:
 
         self.latest_eval = current_eval
         self.add_move(best_move)
+        self.no_moves_available = best_move == "none"
 
         return [best_move, score_type, self.latest_eval]
 
@@ -84,7 +96,47 @@ def human_vs_ai(human_first, path_to_ai, time_per_move):
 
 # Play AI vs AI game.
 def ai_vs_ai(path_to_ai1, path_to_ai2, time_per_move):
-    pass
+    ai1 = AIProcess(path_to_ai1)
+    ai2 = AIProcess(path_to_ai2)
+
+    one_win = False
+    two_win = False
+    draw = False
+
+    win_threshold = 3000 # Equivalent to 3 pyramids.
+
+    if ai1.start() and ai2.start():
+        terminal = False
+        while not terminal:
+            ai_move = ai1.search(time_per_move)
+            print "AI1:", ai_move
+            if ai1.no_moves_available:
+                if ai1.mate_detected:
+                    one_win = ai1.latest_eval > 0
+                    two_win = not one_win
+                else:
+                    draw = True
+                break
+
+            ai2.add_move(ai_move[0])
+
+            ai_move = ai2.search(time_per_move)
+            print "AI2:", ai_move
+            if ai2.no_moves_available:
+                if ai2.mate_detected:
+                    one_win = ai2.latest_eval > 0
+                    two_win = not one_win
+                else:
+                    draw = True
+                break
+
+            ai1.add_move(ai_move[0])
+
+            one_win = ai2.latest_eval > win_threshold
+            two_win = ai2.latest_eval < -win_threshold
+            draw = ai1.is_likely_draw() and ai2.is_likely_draw()
+
+            terminal = one_win or two_win or draw
 
 # Usage:
 # runner.py human ai path-to-khet-ai time-per-move (human is silver vs ai)
