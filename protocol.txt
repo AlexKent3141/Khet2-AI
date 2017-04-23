@@ -32,7 +32,8 @@ newline character only - there should be no other leading or trailing white spac
     Gets the name of the engine.
 
 - bestmove X
-    The engine has finished searching and returns the best move.
+    The engine has finished searching and returns the best move. If no moves were available (i.e.
+    the game is already finished) then "bestmove none" will be returned.
 
 - info
     The engine wants to send info to the UI. There are a few possible info-types:
@@ -42,5 +43,8 @@ newline character only - there should be no other leading or trailing white spac
         The time that has been spent searching in milliseconds.
     - score X
         The score of the position that is being searched.
+    - mate X
+        A checkmate has been detected. X is the number of moves until mate (negative if the current
+        player is going to be mated).
     - string X
         A string that the engine wants to display. Could contain debug info.
