@@ -1,187 +1,217 @@
 #include "MoveGenerator.h"
 #include "SquareHelpers.h"
+#include <cstring>
 
 MoveGenerator::MoveGenerator(const Board& board)
 {
-    _board = new Board(board);
-    _player = _board->PlayerToMove();
-    
-    // Check whether the board position is terminal.
-    _hasPieces = board.IsCheckmate() || board.IsDraw() ? false : NextPiece();
-}
-
-MoveGenerator::~MoveGenerator()
-{
-    if (_board != nullptr)
+    if (!board.IsCheckmate() && !board.IsDraw())
     {
-        delete _board;
-        _board = nullptr;
+        Generate(board);
     }
 }
 
 // Get the next move.
 Move* MoveGenerator::Next()
 {
-    Move* move = nullptr;
-
-    if (_hasPieces && (move = NextMoveForPiece()) == nullptr)
+    // Ensure that the current stage has moves.
+    while (_stage != Stage::Done && ++_moveIndex >= (int)_currentMoves->size())
     {
-        _hasPieces = NextPiece();
-        move = Next();
+        _moveIndex = -1;
+        NextStage();
     }
 
-    return move;
+    return _stage != Stage::Done ? (*_currentMoves)[_moveIndex] : nullptr;
 }
 
-// Try to find the next move for the current piece.
-Move* MoveGenerator::NextMoveForPiece()
+void MoveGenerator::NextStage()
 {
-    Move* move = nullptr;
-
-    // This is piece specific.
-    switch (_pieceType)
-    {
-    case Piece::Anubis:
-        move = NextMoveForAnubis();
-        break;
-    case Piece::Pyramid:
-        move = NextMoveForPyramid();
-        break;
-    case Piece::Scarab:
-        move = NextMoveForScarab();
-        break;
-    case Piece::Pharaoh:
-        move = NextMoveForPharaoh();
-        break;
-    case Piece::Sphinx:
-        move = NextMoveForSphinx();
-        break;
-    default:
-        break;
-    }
-
-    return move;
+    _stage = (Stage)((int)_stage + 1);
+    _currentMoves = _stage == Stage::Quiet ? &_quietMoves : nullptr;
 }
 
-// Find the next piece.
-bool MoveGenerator::NextPiece()
+// Generate all of the moves and cache them as either captures or quiet.
+void MoveGenerator::Generate(const Board& board)
 {
-    bool pieceFound = false;
-    while (!pieceFound && ++_pieceIndex < BoardArea)
+    FireLaser(board);
+
+    Player player = board.PlayerToMove();
+    Piece piece;
+
+    // Iterate over the pieces.
+    for (int i = 0; i < BoardArea; i++)
     {
-        Square s = _board->Get(_pieceIndex);
-        if (IsPiece(s) && GetOwner(s) == _player)
+        Square s = board.Get(i);
+        if (IsPiece(s) && GetOwner(s) == player)
         {
-            _directionIndex = 0;
-            _rotationIndex = 0;
-            _pieceType = GetPiece(s);
-            pieceFound = true;
+            piece = GetPiece(s);
+
+            switch (piece)
+            {
+            case Piece::Anubis:
+                GenerateAnubisMoves(board, i);
+                break;
+            case Piece::Pyramid:
+                GeneratePyramidMoves(board, i);
+                break;
+            case Piece::Scarab:
+                GenerateScarabMoves(board, i);
+                break;
+            case Piece::Pharaoh:
+                GeneratePharaohMoves(board, i);
+                break;
+            case Piece::Sphinx:
+                GenerateSphinxMoves(board, i);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+}
+
+void MoveGenerator::FireLaser(const Board& board)
+{
+    memset(_laserPath, -1, BoardArea*sizeof(int));
+
+    // Find the starting location and direction for the laser beam.
+    int loc = Sphinx[(int)board.PlayerToMove()];
+    int dirIndex = GetOrientation(board.Get(loc));
+    int dir, p;
+    Square dest = Empty;
+    while (dest != OffBoard && dirIndex >= 0)
+    {
+        _laserPath[loc] = dirIndex;
+
+        dir = Directions[dirIndex];
+
+        // Take a step with the laser beam.
+        loc += dir;
+
+        // Is this location occupied?
+        dest = board.Get(loc);
+        if (IsPiece(dest))
+        {
+            p = (int)GetPiece(dest);
+            dirIndex = Reflections[dirIndex][p - 2][GetOrientation(dest)];
         }
     }
 
-    return pieceFound;
+    _passiveCapture = dirIndex == Dead;
 }
 
-Move* MoveGenerator::NextMoveForAnubis()
+// Add the specified move to one of the caches.
+void MoveGenerator::AddMove(const Board& board, Move* move)
 {
-    Move* move = nullptr;
+    // Is this move dynamic and not obviously losing?
+    int dirEnd = _laserPath[move->End()];
+    if (dirEnd >= 0)
+    {
+        // Does this piece die?
+        Square sq = board.Get(move->Start());
+        int p = (int)GetPiece(sq);
+        if (move->Rotation() != 0)
+            sq = Rotate(sq, move->Rotation());
+        int o = (int)GetOrientation(sq);
+
+        if (Reflections[dirEnd][p - 2][o] == Dead)
+            _quietMoves.push_back(move);
+        else
+            _dynamicMoves.push_back(move);
+    }
+    else
+    {
+        if (_passiveCapture)
+            _dynamicMoves.push_back(move);
+        else
+            _quietMoves.push_back(move);
+    }
+}
+
+void MoveGenerator::GenerateAnubisMoves(const Board& board, int loc)
+{
     int destIndex;
+    int player = (int)board.PlayerToMove();
 
     // Find the non-rotation moves.
     // These moves can be blocked.
-    while (move == nullptr && _directionIndex < Directions.size())
+    for (size_t d = 0; d < Directions.size(); d++)
     {
         // Is there a space in this direction?
-        destIndex = _pieceIndex + Directions[_directionIndex++];
-        if (_board->Get(destIndex) == Empty && CanMove[(int)_player][destIndex])
+        destIndex = loc + Directions[d];
+        if (board.Get(destIndex) == Empty && CanMove[player][destIndex])
         {
-            move = new Move(_pieceIndex, destIndex, 0);
+            AddMove(board, new Move(loc, destIndex, 0));
         }
     }
 
     // Find the rotation moves.
-    if (move == nullptr && _rotationIndex < Rotations.size())
+    for (size_t r = 0; r < Rotations.size(); r++)
     {
-        move = new Move(_pieceIndex, _pieceIndex, Rotations[_rotationIndex++]);
+        AddMove(board, new Move(loc, loc, Rotations[r]));
     }
-
-    return move;
 }
 
 // Pyramids have the same movement options as Anubis'.
-Move* MoveGenerator::NextMoveForPyramid()
+void MoveGenerator::GeneratePyramidMoves(const Board& board, int loc)
 {
-    return NextMoveForAnubis();
+    GenerateAnubisMoves(board, loc);
 }
 
 // Scarabs have the additional ability that they can swap with pieces.
 // Only need to consider one rotation direction.
-Move* MoveGenerator::NextMoveForScarab()
+void MoveGenerator::GenerateScarabMoves(const Board& board, int loc)
 {
-    Move* move = nullptr;
     int destIndex;
+    int player = (int)board.PlayerToMove();
     Square sq;
 
     // Find the non-rotation moves.
     // These moves can be blocked.
-    while (move == nullptr && _directionIndex < Directions.size())
+    for (size_t d = 0; d < Directions.size(); d++)
     {
         // Is there a space or swappable piece in this direction?
-        destIndex = _pieceIndex + Directions[_directionIndex++];
-        sq = _board->Get(destIndex);
-        if ((sq == Empty || (sq != OffBoard && (int)GetPiece(sq) < 4)) && CanMove[(int)_player][destIndex])
+        destIndex = loc + Directions[d];
+        sq = board.Get(destIndex);
+        if ((sq == Empty || (sq != OffBoard && (int)GetPiece(sq) < 4)) && CanMove[player][destIndex])
         {
-            move = new Move(_pieceIndex, destIndex, 0);
+            AddMove(board, new Move(loc, destIndex, 0));
         }
     }
 
     // Consider the rotation move.
-    if (move == nullptr && _rotationIndex == 0)
-    {
-        move = new Move(_pieceIndex, _pieceIndex, Rotations[_rotationIndex++]);
-    }
-
-    return move;
+    AddMove(board, new Move(loc, loc, Rotations[0]));
 }
 
 // Pharaohs aren't allowed to rotate - it would be equivalent to passing.
-Move* MoveGenerator::NextMoveForPharaoh()
+void MoveGenerator::GeneratePharaohMoves(const Board& board, int loc)
 {
-    Move* move = nullptr;
     int destIndex;
+    int player = (int)board.PlayerToMove();
 
     // Find the non-rotation moves.
     // These moves can be blocked.
-    while (move == nullptr && _directionIndex < Directions.size())
+    for (size_t d = 0; d < Directions.size(); d++)
     {
         // Is there a space in this direction?
-        destIndex = _pieceIndex + Directions[_directionIndex++];
-        if (_board->Get(destIndex) == Empty && CanMove[(int)_player][destIndex])
+        destIndex = loc + Directions[d];
+        if (board.Get(destIndex) == Empty && CanMove[player][destIndex])
         {
-            move = new Move(_pieceIndex, destIndex, 0);
+            AddMove(board, new Move(loc, destIndex, 0));
         }
     }
-
-    return move;
 }
 
 // Sphinxes cannot move but do have one rotation available to them on each turn.
-Move* MoveGenerator::NextMoveForSphinx()
+void MoveGenerator::GenerateSphinxMoves(const Board& board, int loc)
 {
-    Move* move = nullptr;
-
     // There is exactly one rotation move available.
-    if (_rotationIndex++ == 0)
-    {
-        Square sq = _board->Get(Sphinx[(int)_player]);
-        int o = GetOrientation(sq);
-        int rotation = _player == Player::Silver
-                       ? (o == Up ? -1 : 1)
-                       : (o == Down ? -1 : 1);
+    Player player = board.PlayerToMove();
+    Square sq = board.Get(Sphinx[(int)player]);
+    int o = GetOrientation(sq);
+    int rotation = player == Player::Silver
+                   ? (o == Up ? -1 : 1)
+                   : (o == Down ? -1 : 1);
 
-        move = new Move(_pieceIndex, _pieceIndex, rotation);
-    }
-
-    return move;
+    AddMove(board, new Move(loc, loc, rotation));
 }
 
