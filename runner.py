@@ -1,6 +1,72 @@
 import pexpect
+import random
 import sys
 
+# Generate pseudo-random Khet positions.
+class PositionGenerator:
+    def generate(self):
+        pieces_to_place = ['P','P','P','P','P','P','P','A','A','S','S','K']
+        board = ['' for i in range(0, 80)]
+        orientations = [0 for i in range(0, 80)]
+
+        # Place the sphinxes with the typical locations and orientations.
+        board[9] = 'X'
+        board[70] = 'x'
+        orientations[70] = 2
+
+        # Place the remaining pieces randomly.
+        while pieces_to_place:
+            loc = random.randint(0, 79)
+
+            # Is it possible to place a silver piece there?
+            if board[loc] or loc % 10 == 0 or loc == 8 or loc == 78 or loc == 9:
+                continue
+
+            # Choose and place random piece.
+            p_idx = random.randint(0, len(pieces_to_place)-1)
+            p = pieces_to_place.pop(p_idx)
+            board[loc] = p
+
+            # Choose a random orientation.
+            o = random.randint(0, 3)
+            orientations[loc] = o
+
+            # Place the mirrored red piece.
+            board[79-loc] = p.lower()
+            orientations[79-loc] = o+2 if o < 2 else o-2
+
+        return self.__khet_str(board, orientations)
+
+    def __khet_str(self, board, orientations):
+        ks = ""
+        space = 0
+        for r in range(7, -1, -1):
+            for c in range(0, 10):
+                i = 10*r + c
+                if board[i]:
+                    if space > 0:
+                        ks += str(space)
+                        space = 0
+
+                    p = board[i];
+                    ks += p
+                    if p.upper() != 'K':
+                        ks += str(orientations[i]);
+                else:
+                    space += 1
+
+            if space > 0 and space < 10:
+                ks += str(space)
+                space = 0
+
+            if r > 0:
+                ks += '/'
+
+        ks += " 0"
+
+        return ks
+
+# Handle communications with the AI program at the specified path.
 class AIProcess:
     def __init__(self, ai_path):
         self.path = ai_path
@@ -52,10 +118,7 @@ class AIProcess:
                 tokens = line.split(" ")
                 best_move = tokens[1]
 
-        if current_eval == 0:
-            self.zeroes += 1
-        else:
-            self.zeroes = 0
+        self.zeroes += 1 if current_eval == 0 else 0
 
         self.latest_eval = current_eval
         self.add_move(best_move)
@@ -137,6 +200,8 @@ def ai_vs_ai(path_to_ai1, path_to_ai2, time_per_move):
             draw = ai1.is_likely_draw() and ai2.is_likely_draw()
 
             terminal = one_win or two_win or draw
+
+    return 1 if one_win else -1 if two_win else 0
 
 # Usage:
 # runner.py human ai path-to-khet-ai time-per-move (human is silver vs ai)
