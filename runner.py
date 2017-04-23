@@ -77,9 +77,10 @@ class AIProcess:
         self.proc = pexpect.spawn(self.path)
         return self.proc != None
 
-    def new_game(self):
+    def new_game(self, start_pos = "standard"):
         if self.proc:
             self.proc.sendline("newgame")
+        self.start_pos = start_pos
         self.zeroes = 0
         self.latest_eval = 0
         self.moves = ""
@@ -97,7 +98,7 @@ class AIProcess:
         return self.zeroes > 2
 
     def search(self, time):
-        self.proc.sendline("position standard " + self.moves)
+        self.proc.sendline("position " + self.start_pos + " " + self.moves)
         self.proc.sendline("go movetime " + str(time))
         current_eval = 0
         best_move = ""
@@ -158,7 +159,7 @@ def human_vs_ai(human_first, path_to_ai, time_per_move):
         print "Error starting AI process"
 
 # Play AI vs AI game.
-def ai_vs_ai(path_to_ai1, path_to_ai2, time_per_move):
+def ai_vs_ai(path_to_ai1, path_to_ai2, time_per_move, start_pos = "standard"):
     ai1 = AIProcess(path_to_ai1)
     ai2 = AIProcess(path_to_ai2)
 
@@ -169,6 +170,9 @@ def ai_vs_ai(path_to_ai1, path_to_ai2, time_per_move):
     win_threshold = 3000 # Equivalent to 3 pyramids.
 
     if ai1.start() and ai2.start():
+        ai1.new_game(start_pos)
+        ai2.new_game(start_pos)
+
         terminal = False
         while not terminal:
             ai_move = ai1.search(time_per_move)
@@ -203,15 +207,44 @@ def ai_vs_ai(path_to_ai1, path_to_ai2, time_per_move):
 
     return 1 if one_win else -1 if two_win else 0
 
+# Run a tournament between the two programs and report the results.
+def ai_tournament(path_to_ai1, path_to_ai2, num_positions, time_per_move):
+    gen = PositionGenerator()
+    one_points = 0
+    games = 0
+    for p in range(0, num_positions):
+        pos = gen.generate()
+
+        # The AI's much play both sides of this position.
+        score = ai_vs_ai(path_to_ai1, path_to_ai2, time_per_move, pos)
+        if score > 0:
+            one_points += 1
+        elif score == 0:
+            one_points += 0.5
+        games += 1
+
+        score = ai_vs_ai(path_to_ai2, path_to_ai1, time_per_move, pos)
+        if score < 0:
+            one_points += 1
+        elif score == 0:
+            one_points += 0.5
+        games += 1
+
+        print (one_points + .0)/games, one_points, "/", games
+
 # Usage:
 # runner.py human ai path-to-khet-ai time-per-move (human is silver vs ai)
 # runner.py ai human path-to-khet-ai time-per-move (human is red vs ai)
 # runner.py ai ai path-to-khet-ai-1 path-to-khet-ai-2 time-per-move (ai vs ai)
+# runner.py tournament path-to-khet-ai1 path-to-khet-ai-2 time-per-move
 if __name__ == "__main__":
     num_args = len(sys.argv)
     if num_args == 5:
-        human_first = sys.argv[1] == "human"
-        human_vs_ai(human_first, sys.argv[3], sys.argv[4])
+        if sys.argv[1] == "tournament":
+            ai_tournament(sys.argv[2], sys.argv[3], 1000, sys.argv[4])
+        else:
+            human_first = sys.argv[1] == "human"
+            human_vs_ai(human_first, sys.argv[3], sys.argv[4])
     elif num_args == 6:
         ai_vs_ai(sys.argv[3], sys.argv[4], sys.argv[5])
     else:
