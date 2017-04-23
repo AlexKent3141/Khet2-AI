@@ -1,5 +1,5 @@
 # Khet2-AI
-AI program which plays Khet 2.0.
+AI program which plays Khet 2.0. ([It's Chess, with frickin' laser beams!](https://www.youtube.com/watch?v=dUGPyvyUxnM))
 
 Khet 2.0 is an interesting two-player board game where each player tries to position their pieces (some of which have reflective sides) so that when they fire their laser the opponent's Pharaoh is hit.
 
@@ -21,5 +21,8 @@ These may be subject to further tweaks once the AI can be tested fully.
 2) Implement move generation (with basic testing framework) *Done*
 3) Implement make/unmake move functionality *Done*
 4) Implement basic AI (iterative deepening alpha-beta) *Done (simple case)*
-5) Implement communications (see UCI protocol for chess) *In Progress*
-6) ...
+5) Implement communications *Done (see protocol document)*
+6) Add capability to:
+  (a) Play against the current AI version (human vs AI)
+  (b) Play different versions of the AI against each other (AI vs AI)
+7) ...
