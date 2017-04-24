@@ -139,7 +139,7 @@ bool Board::FireLaser(uint64_t& hash)
     // Find the starting location and direction for the laser beam.
     int loc = Sphinx[(int)_playerToMove];
     int dirIndex = GetOrientation(_board[loc]);
-    int dir, p;
+    int dir, p = 0;
     Square dest = Empty;
     while (dest != OffBoard && dirIndex >= 0)
     {
@@ -267,7 +267,7 @@ void Board::ParseLine(int index, const std::string& line)
 
 Piece Board::PieceFromChar(char c) const
 {
-    Piece p;
+    auto p = Piece::Sphinx;
 
     c = tolower(c);
     if (c == 'a')
@@ -278,15 +278,13 @@ Piece Board::PieceFromChar(char c) const
         p = Piece::Scarab;
     else if (c == 'k')
         p = Piece::Pharaoh;
-    else if (c == 'x')
-        p = Piece::Sphinx;
 
     return p;
 }
 
 char Board::CharFromPiece(Player player, Piece piece) const
 {
-    char c;
+    char c = 'x';
 
     if (piece == Piece::Anubis)
         c = 'a';
@@ -296,8 +294,6 @@ char Board::CharFromPiece(Player player, Piece piece) const
         c = 's';
     else if (piece == Piece::Pharaoh)
         c = 'k';
-    else if (piece == Piece::Sphinx)
-        c = 'x'; 
 
     return player == Player::Silver ? toupper(c) : c;
 }

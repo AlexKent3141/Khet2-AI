@@ -19,6 +19,8 @@ public:
 
     MoveGenerator() = delete;
     MoveGenerator(const Board&);
+    ~MoveGenerator();
+
     Move* Next();
 
 private:

@@ -10,6 +10,21 @@ MoveGenerator::MoveGenerator(const Board& board)
     }
 }
 
+MoveGenerator::~MoveGenerator()
+{
+    // Free memory for any unused moves.
+    while (_stage != Stage::Done)
+    {
+        for (size_t i = _moveIndex + 1; i < _currentMoves->size(); i++)
+        {
+            delete (*_currentMoves)[i];
+        }
+
+        _moveIndex = -1;
+        NextStage();
+    }
+}
+
 // Get the next move.
 Move* MoveGenerator::Next()
 {
