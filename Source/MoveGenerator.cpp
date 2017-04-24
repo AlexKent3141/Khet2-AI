@@ -2,8 +2,9 @@
 #include "SquareHelpers.h"
 #include <cstring>
 
-MoveGenerator::MoveGenerator(const Board& board)
+MoveGenerator::MoveGenerator(const Board& board, Stage finalStage)
 {
+    _stoppedStage = (Stage)((int)finalStage + 1);
     if (!board.IsCheckmate() && !board.IsDraw())
     {
         Generate(board);
@@ -29,13 +30,13 @@ MoveGenerator::~MoveGenerator()
 Move* MoveGenerator::Next()
 {
     // Ensure that the current stage has moves.
-    while (_stage != Stage::Done && ++_moveIndex >= (int)_currentMoves->size())
+    while (_stage != _stoppedStage && ++_moveIndex >= (int)_currentMoves->size())
     {
         _moveIndex = -1;
         NextStage();
     }
 
-    return _stage != Stage::Done ? (*_currentMoves)[_moveIndex] : nullptr;
+    return _stage != _stoppedStage ? (*_currentMoves)[_moveIndex] : nullptr;
 }
 
 void MoveGenerator::NextStage()

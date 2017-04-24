@@ -18,7 +18,7 @@ public:
     };
 
     MoveGenerator() = delete;
-    MoveGenerator(const Board&);
+    MoveGenerator(const Board&, Stage finalStage = Stage::Quiet);
     ~MoveGenerator();
 
     Move* Next();
@@ -27,6 +27,7 @@ private:
     bool _passiveCapture = false;
     int _moveIndex = -1;
     Stage _stage = Stage::Dynamic;
+    Stage _stoppedStage;
 
     std::vector<Move*> _dynamicMoves;
     std::vector<Move*> _quietMoves;

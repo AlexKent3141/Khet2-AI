@@ -147,7 +147,7 @@ int Search::AlphaBeta(const Evaluator& eval, Board& board, int depth, int alpha,
     int score = INT_MIN;
     if (depth == 0 || board.IsCheckmate() || board.IsDraw())
     {
-        score = sign * eval(board);
+        score = Quiesce(eval, board, 2, alpha, beta, sign);
     }
     else
     {
@@ -158,6 +158,36 @@ int Search::AlphaBeta(const Evaluator& eval, Board& board, int depth, int alpha,
         {
             board.MakeMove(move);
             val = -AlphaBeta(eval, board, depth-1, -beta, -alpha, -sign);
+            board.UndoMove();
+            delete move;
+
+            // Update the bounds.
+            score = std::max(score, val);
+            alpha = std::max(alpha, val);
+            if (alpha >= beta)
+            {
+                break;
+            }
+        }
+    }
+
+    return score;
+}
+
+int Search::Quiesce(const Evaluator& eval, Board& board, int depth, int alpha, int beta, int sign)
+{
+    int score = sign * eval(board);
+    if (depth > 0 && !board.IsCheckmate() && !board.IsDraw())
+    {
+        alpha = std::max(alpha, score);
+
+        MoveGenerator gen(board, MoveGenerator::Stage::Dynamic);
+        Move* move;
+        int val;
+        while ((move = gen.Next()) != nullptr && CheckTime())
+        {
+            board.MakeMove(move);
+            val = -Quiesce(eval, board, depth-1, -beta, -alpha, -sign);
             board.UndoMove();
             delete move;
 

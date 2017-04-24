@@ -1,5 +1,5 @@
 APP=khet
-CXXFLAGS=-Wall -std=c++11
+CXXFLAGS=-Wall -std=c++11 -O2
 LDFLAGS=-lpthread
 
 src=$(wildcard *.cpp)

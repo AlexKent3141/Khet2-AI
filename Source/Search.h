@@ -38,6 +38,9 @@ private:
 
     // Score the given position using NegaMax with Alpha-Beta pruning.
     int AlphaBeta(const Evaluator&, Board&, int depth, int alpha, int beta, int sign);
+
+    // Quiescence search extension.
+    int Quiesce(const Evaluator&, Board&, int depth, int alpha, int beta, int sign);
 };
 
 #endif // __SEARCH_H__
