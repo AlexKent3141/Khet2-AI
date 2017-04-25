@@ -2,9 +2,9 @@
 #include "SquareHelpers.h"
 #include <cstring>
 
-MoveGenerator::MoveGenerator(const Board& board, Stage finalStage)
+MoveGenerator::MoveGenerator(const Board& board, int finalStage)
 {
-    _stoppedStage = (Stage)((int)finalStage + 1);
+    _stoppedStage = finalStage + 1;
     if (!board.IsCheckmate() && !board.IsDraw())
     {
         Generate(board);
@@ -14,7 +14,7 @@ MoveGenerator::MoveGenerator(const Board& board, Stage finalStage)
 MoveGenerator::~MoveGenerator()
 {
     // Free memory for any unused moves.
-    while (_stage != Stage::Done)
+    while (_stage != Done)
     {
         for (size_t i = _moveIndex + 1; i < _currentMoves->size(); i++)
         {
@@ -41,8 +41,8 @@ Move* MoveGenerator::Next()
 
 void MoveGenerator::NextStage()
 {
-    _stage = (Stage)((int)_stage + 1);
-    _currentMoves = _stage == Stage::Quiet ? &_quietMoves : nullptr;
+    ++_stage;
+    _currentMoves = _stage == Done ? nullptr : &_moveBuffers[_stage];
 }
 
 // Generate all of the moves and cache them as either captures or quiet.
@@ -116,30 +116,37 @@ void MoveGenerator::FireLaser(const Board& board)
 }
 
 // Add the specified move to one of the caches.
-void MoveGenerator::AddMove(const Board& board, Move* move)
+void MoveGenerator::AddMove(const Board& board, int start, int end, int rotation)
 {
     // Is this move dynamic and not obviously losing?
-    int dirEnd = _laserPath[move->End()];
+    bool capturesOnly = _stoppedStage == Quiet;
+    int dirEnd = _laserPath[end];
     if (dirEnd >= 0)
     {
         // Does this piece die?
-        Square sq = board.Get(move->Start());
+        Square sq = board.Get(start);
         int p = (int)GetPiece(sq);
-        if (move->Rotation() != 0)
-            sq = Rotate(sq, move->Rotation());
+        if (rotation != 0)
+            sq = Rotate(sq, rotation);
         int o = (int)GetOrientation(sq);
 
         if (Reflections[dirEnd][p - 2][o] == Dead)
-            _quietMoves.push_back(move);
+        {
+            if (!capturesOnly)
+                _moveBuffers[Suicide].push_back(new Move(start, end, rotation));
+        }
         else
-            _dynamicMoves.push_back(move);
+            _moveBuffers[Dynamic].push_back(new Move(start, end, rotation));
     }
     else
     {
         if (_passiveCapture)
-            _dynamicMoves.push_back(move);
+            _moveBuffers[Dynamic].push_back(new Move(start, end, rotation));
         else
-            _quietMoves.push_back(move);
+        {
+            if (!capturesOnly)
+                _moveBuffers[Quiet].push_back(new Move(start, end, rotation));
+        }
     }
 }
 
@@ -156,14 +163,14 @@ void MoveGenerator::GenerateAnubisMoves(const Board& board, int loc)
         destIndex = loc + Directions[d];
         if (board.Get(destIndex) == Empty && CanMove[player][destIndex])
         {
-            AddMove(board, new Move(loc, destIndex, 0));
+            AddMove(board, loc, destIndex, 0);
         }
     }
 
     // Find the rotation moves.
     for (size_t r = 0; r < Rotations.size(); r++)
     {
-        AddMove(board, new Move(loc, loc, Rotations[r]));
+        AddMove(board, loc, loc, Rotations[r]);
     }
 }
 
@@ -190,12 +197,12 @@ void MoveGenerator::GenerateScarabMoves(const Board& board, int loc)
         sq = board.Get(destIndex);
         if ((sq == Empty || (sq != OffBoard && (int)GetPiece(sq) < 4)) && CanMove[player][destIndex])
         {
-            AddMove(board, new Move(loc, destIndex, 0));
+            AddMove(board, loc, destIndex, 0);
         }
     }
 
     // Consider the rotation move.
-    AddMove(board, new Move(loc, loc, Rotations[0]));
+    AddMove(board, loc, loc, Rotations[0]);
 }
 
 // Pharaohs aren't allowed to rotate - it would be equivalent to passing.
@@ -212,7 +219,7 @@ void MoveGenerator::GeneratePharaohMoves(const Board& board, int loc)
         destIndex = loc + Directions[d];
         if (board.Get(destIndex) == Empty && CanMove[player][destIndex])
         {
-            AddMove(board, new Move(loc, destIndex, 0));
+            AddMove(board, loc, destIndex, 0);
         }
     }
 }
@@ -228,6 +235,6 @@ void MoveGenerator::GenerateSphinxMoves(const Board& board, int loc)
                    ? (o == Up ? -1 : 1)
                    : (o == Down ? -1 : 1);
 
-    AddMove(board, new Move(loc, loc, rotation));
+    AddMove(board, loc, loc, rotation);
 }
 

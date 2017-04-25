@@ -181,7 +181,7 @@ int Search::Quiesce(const Evaluator& eval, Board& board, int depth, int alpha, i
     {
         alpha = std::max(alpha, score);
 
-        MoveGenerator gen(board, MoveGenerator::Stage::Dynamic);
+        MoveGenerator gen(board, MoveGenerator::Dynamic);
         Move* move;
         int val;
         while ((move = gen.Next()) != nullptr && CheckTime())

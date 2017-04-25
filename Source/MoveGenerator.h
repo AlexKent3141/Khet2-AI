@@ -10,15 +10,13 @@ class MoveGenerator
 {
 public:
     // Which stage of moves we are currently on.
-    enum class Stage
-    {
-        Dynamic, // Moves that cause a capture/otherwise redirect the laser beam (not suicide).
-        Quiet,
-        Done
-    };
+    static const int Dynamic = 0;
+    static const int Quiet = 1;
+    static const int Suicide = 2;
+    static const int Done = 3;
 
     MoveGenerator() = delete;
-    MoveGenerator(const Board&, Stage finalStage = Stage::Quiet);
+    MoveGenerator(const Board&, int finalStage = Suicide);
     ~MoveGenerator();
 
     Move* Next();
@@ -26,13 +24,12 @@ public:
 private:
     bool _passiveCapture = false;
     int _moveIndex = -1;
-    Stage _stage = Stage::Dynamic;
-    Stage _stoppedStage;
+    int _stage = Dynamic;
+    int _stoppedStage;
 
-    std::vector<Move*> _dynamicMoves;
-    std::vector<Move*> _quietMoves;
-
-    std::vector<Move*>* _currentMoves = &_dynamicMoves;
+    // Maintain a buffer for each stage.
+    std::vector<Move*> _moveBuffers[Done];
+    std::vector<Move*>* _currentMoves = &_moveBuffers[Dynamic];
 
     // Cache the path of the laser.
     // Store the direction of the laser at each point.
@@ -40,7 +37,7 @@ private:
 
     void FireLaser(const Board&);
 
-    void AddMove(const Board&, Move*);
+    void AddMove(const Board&, int, int, int);
 
     void NextStage();
     void Generate(const Board&);
