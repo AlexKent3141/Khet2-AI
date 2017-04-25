@@ -36,7 +36,7 @@ Move* Search::Start(const SearchParams& params, Board& board, int& score)
             // Is this mate for either side?
             if (abs(score) == evalParams.CheckmateVal())
             {
-                int sign = score > 0 && board.PlayerToMove() == Player::Silver ? 1 : -1;
+                int sign = score > 0 ? 1 : -1;
                 MateInfo(d*sign);
                 keepSearching = false;
             }

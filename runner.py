@@ -199,8 +199,8 @@ def ai_vs_ai(path_to_ai1, path_to_ai2, time_per_move, start_pos = "standard"):
 
             ai1.add_move(ai_move[0])
 
-            one_win = ai2.latest_eval > win_threshold
-            two_win = ai2.latest_eval < -win_threshold
+            one_win = ai1.latest_eval > win_threshold and ai2.latest_eval > win_threshold
+            two_win = ai1.latest_eval < -win_threshold and ai2.latest_eval < -win_threshold
             draw = ai1.is_likely_draw() and ai2.is_likely_draw()
 
             terminal = one_win or two_win or draw
