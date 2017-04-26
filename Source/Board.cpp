@@ -27,7 +27,10 @@ int Board::Compare(const Board& other)
     int ret = 0;
 
     // Compare the board squares.
-    while (ret++ < BoardArea + 1 && _board[ret - 1] == other._board[ret - 1]);
+    for (ret = 1; ret <= BoardArea; ret++)
+    {
+        if (_board[ret - 1] != other._board[ret - 1]) break;
+    }
 
     if (ret > BoardArea)
     {
