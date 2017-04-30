@@ -20,10 +20,14 @@ public:
         return _instance;
     }
 
+    inline uint64_t Silver() const { return _silver; }
     inline uint64_t Key(Square sq, int loc) const { return _keys[sq][loc]; }
 
 private:
     static Zobrist* _instance;
+
+    // This key indicates is present if it's silver's turn.
+    uint64_t _silver;
 
     // Need a hash key for each possible square value in each position.
     static_assert(std::numeric_limits<Square>::max() == 0xFF, "Square is the wrong size.");
@@ -33,6 +37,7 @@ private:
     {
         // Note: This is the seed that Stockfish uses.
         RandomGenerator gen(1070372);
+        _silver = gen.Next();
         for (int sq = 0; sq < 0xFF; sq++)
         {
             for (int loc = 0; loc < BoardArea; loc++)

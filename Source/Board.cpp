@@ -77,6 +77,7 @@ void Board::MakeMove(Move const* const move)
     _movesWithoutCapture[_moveNumber] = FireLaser(hash) ? 0 : prevMovesWithoutCapture + 1;
 
     _playerToMove = _playerToMove == Player::Silver ? Player::Red : Player::Silver;
+    hash ^= z->Silver();
 
     _moves[_moveNumber] = move;
     _hashes[_moveNumber] = hash;
@@ -224,6 +225,7 @@ void Board::FromString(const std::string& ks)
     auto utils = Utils::GetInstance();
     auto tokens = utils->Split(ks, ' ');
     _playerToMove = tokens[1] == "0" ? Player::Silver : Player::Red;
+    _hashes[0] ^= _playerToMove == Player::Silver ? Zobrist::Instance()->Silver() : 0;
 
     tokens = utils->Split(tokens[0], '/');
     for (size_t i = 0; i < tokens.size(); i++)
