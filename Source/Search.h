@@ -5,13 +5,14 @@
 #include "Evaluator.h"
 #include "Move.h"
 #include "SearchParams.h"
+#include "TranspositionTable.h"
 #include <ctime>
 
 class Search
 {
 public:
     // Iterative deepening Minimax search.
-    Move* Start(const SearchParams&, Board&, int&);
+    Move* Start(TT&, const SearchParams&, Board&, int&);
 
     // Stop the current search.
     void Stop();
@@ -34,10 +35,10 @@ private:
     bool CheckTime() const;
 
     // This root call to the Alpha-Beta search returns the best root move.
-    Move* AlphaBetaRoot(const Evaluator&, Board&, int, int&);
+    Move* AlphaBetaRoot(TT&, const Evaluator&, Board&, int, int&);
 
     // Score the given position using NegaMax with Alpha-Beta pruning.
-    int AlphaBeta(const Evaluator&, Board&, int depth, int alpha, int beta, int sign);
+    int AlphaBeta(TT&, const Evaluator&, Board&, int depth, int alpha, int beta, int sign);
 
     // Quiescence search extension.
     int Quiesce(const Evaluator&, Board&, int depth, int alpha, int beta, int sign);

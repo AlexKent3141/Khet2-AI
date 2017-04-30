@@ -5,8 +5,8 @@
 
 CommsHandler::~CommsHandler()
 {
-    if (_board != nullptr)
-        delete _board;
+    _table.Clear();
+    ClearBoard();
 }
 
 bool CommsHandler::Process(const std::string& message)
@@ -17,21 +17,21 @@ bool CommsHandler::Process(const std::string& message)
     std::string messageType = tokens[0];
     if (messageType == "newgame")
     {
-        if (_board != nullptr)
-            delete _board;
+        _calculator.Stop();
+        _table.Clear();
+        ClearBoard();
     }
     else if (messageType == "position")
     {
-        if (_board != nullptr)
-            delete _board;
-
+        ClearBoard();
         _board = CreatePosition(tokens);
     }
     else if (messageType == "go")
     {
         assert(_board != nullptr);
         SearchParams* params = CreateSearchParameters(tokens);
-        _calculator.Start(*params, *_board);
+        _table.Age();
+        _calculator.Start(_table, *params, *_board);
         delete params;
     }
     else if (messageType == "stop")
@@ -49,6 +49,15 @@ bool CommsHandler::Process(const std::string& message)
     }
 
     return alive;
+}
+
+void CommsHandler::ClearBoard()
+{
+    if (_board != nullptr)
+    {
+        delete _board;
+        _board = nullptr;
+    }
 }
 
 Board* CommsHandler::CreatePosition(const std::vector<std::string>& tokens) const

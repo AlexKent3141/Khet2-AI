@@ -6,7 +6,7 @@
 #include <climits>
 
 // Iterative deepening framework.
-Move* Search::Start(const SearchParams& params, Board& board, int& score)
+Move* Search::Start(TT& table, const SearchParams& params, Board& board, int& score)
 {
     const int MaxDepth = 100;
 
@@ -23,7 +23,7 @@ Move* Search::Start(const SearchParams& params, Board& board, int& score)
     Evaluator eval(evalParams);
     for (int d = 1; keepSearching && d <= MaxDepth; d++)
     {
-        tempMove = AlphaBetaRoot(eval, board, d, tempScore);
+        tempMove = AlphaBetaRoot(table, eval, board, d, tempScore);
         keepSearching = CheckTime();
         if (keepSearching)
         {
@@ -101,7 +101,7 @@ bool Search::CheckTime() const
 }
 
 // Initial alpha-beta call which assesses the root nodes and returns the best move.
-Move* Search::AlphaBetaRoot(const Evaluator& eval, Board& board, int depth, int& score)
+Move* Search::AlphaBetaRoot(TT& table, const Evaluator& eval, Board& board, int depth, int& score)
 {
     score = INT_MIN;
     Move* bestMove = nullptr;
@@ -118,7 +118,7 @@ Move* Search::AlphaBetaRoot(const Evaluator& eval, Board& board, int depth, int&
         while ((move = gen.Next()) != nullptr)
         {
             board.MakeMove(move);
-            val = -AlphaBeta(eval, board, depth-1, INT_MIN, INT_MAX, -sign);
+            val = -AlphaBeta(table, eval, board, depth-1, INT_MIN, INT_MAX, -sign);
             board.UndoMove();
 
             // If this move is better then store the move and score.
@@ -142,7 +142,7 @@ Move* Search::AlphaBetaRoot(const Evaluator& eval, Board& board, int depth, int&
 }
 
 // Alpha-beta call which returns the value of the specified board state.
-int Search::AlphaBeta(const Evaluator& eval, Board& board, int depth, int alpha, int beta, int sign)
+int Search::AlphaBeta(TT& table, const Evaluator& eval, Board& board, int depth, int alpha, int beta, int sign)
 {
     int score = INT_MIN;
     if (depth == 0 || board.IsCheckmate() || board.IsDraw())
@@ -157,7 +157,7 @@ int Search::AlphaBeta(const Evaluator& eval, Board& board, int depth, int alpha,
         while ((move = gen.Next()) != nullptr && CheckTime())
         {
             board.MakeMove(move);
-            val = -AlphaBeta(eval, board, depth-1, -beta, -alpha, -sign);
+            val = -AlphaBeta(table, eval, board, depth-1, -beta, -alpha, -sign);
             board.UndoMove();
             delete move;
 

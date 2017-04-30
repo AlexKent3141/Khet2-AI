@@ -1,10 +1,10 @@
 #include "Calculator.h"
 #include <thread>
 
-void Calculator::Start(const SearchParams& params, Board& board)
+void Calculator::Start(TT& table, const SearchParams& params, Board& board)
 {
     // Start the search asynchronously.
-    _thread = std::thread(&Calculator::ThreadFunc, this, params, std::ref(board));
+    _thread = std::thread(&Calculator::ThreadFunc, this, std::ref(table), params, std::ref(board));
     _thread.detach();
 }
 
@@ -16,7 +16,8 @@ void Calculator::Stop()
 }
 
 // Callback method for the thread.
-void Calculator::ThreadFunc(const SearchParams& params, Board& board)
+void Calculator::ThreadFunc(TT& table, const SearchParams& params, Board& board)
 {
-    _bestMove = _search.Start(params, board, _score);
+    int score = 0;
+    _search.Start(table, params, board, score);
 }

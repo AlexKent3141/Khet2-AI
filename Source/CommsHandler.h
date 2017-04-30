@@ -2,6 +2,7 @@
 #define __COMMS_HANDLER_H__
 
 #include "Calculator.h"
+#include "TranspositionTable.h"
 #include <string>
 
 // This class processes incoming messages.
@@ -23,8 +24,10 @@ private:
         "x33a3ka3s22//3P42p13/p1P32P2s22p2P4/p2P42S2p42p1P3/3P32p23//2S2A1KA13X1 0";
 
     Calculator _calculator;
+    TT _table;
     Board* _board = nullptr;
 
+    void ClearBoard();
     Board* CreatePosition(const std::vector<std::string>&) const;
     SearchParams* CreateSearchParameters(const std::vector<std::string>&) const;
 };
