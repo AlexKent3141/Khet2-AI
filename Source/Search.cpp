@@ -151,24 +151,58 @@ int Search::AlphaBeta(TT& table, const Evaluator& eval, Board& board, int depth,
     }
     else
     {
+        int alphaOrig = alpha;
+
+        // Lookup the current position in the TT.
+        Entry* e = table.Find(board.HashKey());
+        if (e != nullptr && e->Depth() >= depth)
+        {
+            if (e->Type() == EntryType::Exact)
+                return e->Value();
+            else if (e->Type() == EntryType::Alpha)
+                alpha = std::max(alpha, e->Value());
+            else
+                beta = std::min(beta, e->Value());
+
+            if (alpha >= beta)
+                return e->Value();
+        }
+
         MoveGenerator gen(board);
         Move* move;
+        Move* bestMove = nullptr;
         int val;
         while ((move = gen.Next()) != nullptr && CheckTime())
         {
             board.MakeMove(move);
             val = -AlphaBeta(table, eval, board, depth-1, -beta, -alpha, -sign);
             board.UndoMove();
-            delete move;
 
             // Update the bounds.
-            score = std::max(score, val);
+            if (val > score)
+            {
+                bestMove = move;
+                score = val;
+            }
+            else
+            {
+                delete move;
+            }
+
             alpha = std::max(alpha, val);
             if (alpha >= beta)
             {
                 break;
             }
         }
+
+        // Insert the newly evaluated position.
+        auto type = score <= alphaOrig ? EntryType::Beta
+            : score >= beta ? EntryType::Alpha
+            : EntryType::Exact;
+
+        if (bestMove != nullptr)
+            table.Insert(board.HashKey(), type, bestMove, depth, score);
     }
 
     return score;

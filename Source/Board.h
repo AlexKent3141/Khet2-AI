@@ -23,6 +23,7 @@ public:
     inline bool IsCheckmate() const { return _checkmate; }
     inline bool IsDraw() const { return _drawn; }
     inline Square LastCapture() const { return _captureSquare[_moveNumber]; }
+    inline uint64_t HashKey() const { return _hashes[_moveNumber]; }
 
     // Making/unmaking moves.
     void MakeMove(Move const* const);
