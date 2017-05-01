@@ -87,11 +87,10 @@ public:
         if (e != _map.end())
         {
             // Should this entry be replaced with the new one?
-            // TODO: Currently got a problem here where replacing seems to corrupt the table...
-          //if (e->second.Depth() < depth)
-          //{
-          //    e->second = Entry(type, move, depth, value);
-          //}
+            if (e->second.Depth() < depth)
+            {
+                e->second = Entry(type, move, depth, value);
+            }
         }
         else
         {

@@ -176,7 +176,8 @@ int Search::AlphaBeta(TT& table, const Evaluator& eval, Board& board, int depth,
         MoveGenerator gen(board, hashMove);
         Move* move = nullptr;
         int val;
-        while ((move = gen.Next()) != nullptr && CheckTime())
+        bool inTime = false;
+        while ((move = gen.Next()) != nullptr && (inTime = CheckTime()))
         {
             board.MakeMove(move);
             val = -AlphaBeta(table, eval, board, depth-1, -beta, -alpha, -sign);
@@ -199,7 +200,8 @@ int Search::AlphaBeta(TT& table, const Evaluator& eval, Board& board, int depth,
             : score >= beta ? EntryType::Alpha
             : EntryType::Exact;
 
-        table.Insert(board.HashKey(), type, move, depth, score);
+        if (inTime)
+            table.Insert(board.HashKey(), type, move, depth, score);
     }
 
     return score;
