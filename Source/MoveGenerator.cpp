@@ -11,6 +11,18 @@ MoveGenerator::MoveGenerator(const Board& board, int finalStage)
     }
 }
 
+MoveGenerator::MoveGenerator(const Board& board, Move* priorityMove, int finalStage)
+{
+    if (priorityMove != nullptr)
+        _moveBuffers[Priority].push_back(priorityMove);
+
+    _stoppedStage = finalStage + 1;
+    if (!board.IsCheckmate() && !board.IsDraw())
+    {
+        Generate(board);
+    }
+}
+
 MoveGenerator::~MoveGenerator()
 {
     // Free memory for any unused moves.

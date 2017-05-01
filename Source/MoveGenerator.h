@@ -10,13 +10,15 @@ class MoveGenerator
 {
 public:
     // Which stage of moves we are currently on.
-    static const int Dynamic = 0;
-    static const int Quiet = 1;
-    static const int Suicide = 2;
-    static const int Done = 3;
+    static const int Priority = 0;
+    static const int Dynamic = 1;
+    static const int Quiet = 2;
+    static const int Suicide = 3;
+    static const int Done = 4;
 
     MoveGenerator() = delete;
     MoveGenerator(const Board&, int finalStage = Suicide);
+    MoveGenerator(const Board&, Move*, int finalStage = Suicide);
     ~MoveGenerator();
 
     Move* Next();
@@ -24,12 +26,12 @@ public:
 private:
     bool _passiveCapture = false;
     int _moveIndex = -1;
-    int _stage = Dynamic;
+    int _stage = Priority;
     int _stoppedStage;
 
     // Maintain a buffer for each stage.
     std::vector<Move*> _moveBuffers[Done];
-    std::vector<Move*>* _currentMoves = &_moveBuffers[Dynamic];
+    std::vector<Move*>* _currentMoves = &_moveBuffers[Priority];
 
     // Cache the path of the laser.
     // Store the direction of the laser at each point.

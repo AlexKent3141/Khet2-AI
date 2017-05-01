@@ -69,7 +69,7 @@ private:
     void CopyFrom(const Entry& other)
     {
         _type = other._type;
-        _move = new Move(*other._move);
+        _move = other._move != nullptr ? new Move(*other._move) : nullptr;
         _depth = other._depth;
         _value = other._value;
         _age = other._age;

@@ -154,6 +154,7 @@ int Search::AlphaBeta(TT& table, const Evaluator& eval, Board& board, int depth,
         int alphaOrig = alpha;
 
         // Lookup the current position in the TT.
+        Move* hashMove = nullptr;
         Entry* e = table.Find(board.HashKey());
         if (e != nullptr && e->Depth() >= depth)
         {
@@ -166,11 +167,13 @@ int Search::AlphaBeta(TT& table, const Evaluator& eval, Board& board, int depth,
 
             if (alpha >= beta)
                 return e->Value();
+
+            if (e->HashMove() != nullptr)
+                hashMove = new Move(*e->HashMove());
         }
 
-        MoveGenerator gen(board);
-        Move* move;
-        Move* bestMove = nullptr;
+        MoveGenerator gen(board, hashMove);
+        Move* move = nullptr;
         int val;
         while ((move = gen.Next()) != nullptr && CheckTime())
         {
@@ -179,21 +182,15 @@ int Search::AlphaBeta(TT& table, const Evaluator& eval, Board& board, int depth,
             board.UndoMove();
 
             // Update the bounds.
-            if (val > score)
-            {
-                bestMove = move;
-                score = val;
-            }
-            else
-            {
-                delete move;
-            }
-
+            score = std::max(score, val);;
             alpha = std::max(alpha, val);
             if (alpha >= beta)
             {
                 break;
             }
+
+            delete move;
+            move = nullptr;
         }
 
         // Insert the newly evaluated position.
@@ -201,8 +198,7 @@ int Search::AlphaBeta(TT& table, const Evaluator& eval, Board& board, int depth,
             : score >= beta ? EntryType::Alpha
             : EntryType::Exact;
 
-        if (bestMove != nullptr)
-            table.Insert(board.HashKey(), type, bestMove, depth, score);
+        table.Insert(board.HashKey(), type, move, depth, score);
     }
 
     return score;
