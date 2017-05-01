@@ -16,6 +16,7 @@ public:
     Board(const std::string&);
 
     int Compare(const Board&);
+    bool IsLegal(Move const* const) const;
 
     // Accessors.
     inline Player PlayerToMove() const { return _playerToMove; }

@@ -168,8 +168,9 @@ int Search::AlphaBeta(TT& table, const Evaluator& eval, Board& board, int depth,
             if (alpha >= beta)
                 return e->Value();
 
-            if (e->HashMove() != nullptr)
-                hashMove = new Move(*e->HashMove());
+            Move* hashMove = e->HashMove();
+            if (hashMove != nullptr && board.IsLegal(hashMove))
+                hashMove = new Move(*hashMove);
         }
 
         MoveGenerator gen(board, hashMove);

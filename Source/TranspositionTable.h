@@ -87,10 +87,11 @@ public:
         if (e != _map.end())
         {
             // Should this entry be replaced with the new one?
-            if (e->second.Depth() <= depth)
-            {
-                e->second = Entry(type, move, depth, value);
-            }
+            // TODO: Currently got a problem here where replacing seems to corrupt the table...
+          //if (e->second.Depth() < depth)
+          //{
+          //    e->second = Entry(type, move, depth, value);
+          //}
         }
         else
         {
@@ -130,7 +131,16 @@ public:
     }
 
 private:
-    std::unordered_map<Key, Entry> _map;
+    struct Hash
+    {
+    public:
+        size_t operator()(const Key& k) const
+        {
+            return k >> 32;
+        }
+    };
+
+    std::unordered_map<Key, Entry, Hash> _map;
 };
 
 typedef TranspositionTable TT;

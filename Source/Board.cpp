@@ -5,6 +5,7 @@
 #include <cassert>
 #include <cctype>
 #include <cstring>
+#include <iostream>
 
 Board::Board(const Board& other)
 {
@@ -49,9 +50,26 @@ void Board::Init()
     memset(_movesWithoutCapture, 0, MaxGameLength*sizeof(int));
 }
 
+bool Board::IsLegal(Move const* const move) const
+{
+    assert(move != nullptr);
+    Square start = _board[move->Start()];
+    Square end = _board[move->End()];
+    bool endOccupancy;
+    bool startOccupancy = IsPiece(start) && GetOwner(start) == _playerToMove;
+    if (startOccupancy)
+        endOccupancy = end == Empty ||
+                       move->Rotation() ||
+                       (GetPiece(start) == Piece::Scarab && (int)GetPiece(end) < 4);
+
+    return startOccupancy && endOccupancy;
+}
+
 void Board::MakeMove(Move const* const move)
 {
+    assert(move != nullptr);
     assert(!_drawn && !_checkmate);
+    assert(IsLegal(move));
 
     auto z = Zobrist::Instance();
     uint64_t hash = _hashes[_moveNumber];
@@ -168,7 +186,7 @@ bool Board::FireLaser(uint64_t& hash)
         _captureSquare[_moveNumber] = dest;
         _captureLocation[_moveNumber] = loc;
         _board[loc] = Empty;
-        _checkmate = p == (int)Piece::Pharaoh;
+        _checkmate |= p == (int)Piece::Pharaoh;
         hash ^= Zobrist::Instance()->Key(dest, loc);
     }
 
