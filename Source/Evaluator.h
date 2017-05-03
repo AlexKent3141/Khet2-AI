@@ -18,6 +18,10 @@ public:
 private:
     EvalParams _params;
 
+    int Distance(int, int) const;
+
+    int FindPharaoh(Player, const Board&) const;
+
     // Check if the board is in a terminal state and score appropriately if so.
     bool TerminalScore(const Board&, int*) const;
 
@@ -28,7 +32,7 @@ private:
     int LaserableScore(const Board&) const;
 
     // Compute the number of laserable squares for the specified player.
-    int LaserableSquares(Player, const Board&) const;
+    int LaserableScore(Player, const Board&) const;
 };
 
 #endif // __EVALUATOR_H__
