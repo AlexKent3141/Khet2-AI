@@ -4,6 +4,7 @@
 #include "TestBase.h"
 #include "../Board.h"
 #include "../MoveGenerator.h"
+#include "../MoveHelpers.h"
 #include "../Types.h"
 #include <cassert>
 #include <iostream>
@@ -48,10 +49,10 @@ private:
     {
         MoveGenerator gen(board);
         int count = 0;
-        Move* move = nullptr;
-        while ((move = gen.Next()) != nullptr) 
+        Move move = NoMove;
+        while ((move = gen.Next()) != NoMove) 
         {
-            delete move;
+            std::cout << GetStart(move) << " " << GetEnd(move) << " " << GetRotation(move) << std::endl;
             ++count;
         }
 

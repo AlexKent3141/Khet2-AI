@@ -3,7 +3,6 @@
 
 #include "Globals.h"
 #include "Types.h"
-#include "Move.h"
 #include <string>
 
 // Represents the Khet board state.
@@ -16,7 +15,7 @@ public:
     Board(const std::string&);
 
     int Compare(const Board&);
-    bool IsLegal(Move const* const) const;
+    bool IsLegal(Move) const;
 
     // Accessors.
     inline Player PlayerToMove() const { return _playerToMove; }
@@ -27,7 +26,7 @@ public:
     inline uint64_t HashKey() const { return _hashes[_moveNumber]; }
 
     // Making/unmaking moves.
-    void MakeMove(Move const* const);
+    void MakeMove(Move);
     void UndoMove();
 
     std::string ToString() const;
@@ -42,7 +41,7 @@ private:
     Square _board[BoardArea];
 
     // Move list.
-    const Move* _moves[MaxGameLength];
+    Move _moves[MaxGameLength] = { NoMove };
 
     // Cache the capture square and location so that it can be restored.
     Square _captureSquare[MaxGameLength];

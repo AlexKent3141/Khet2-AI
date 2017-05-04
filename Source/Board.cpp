@@ -1,4 +1,5 @@
 #include "Board.h"
+#include "MoveHelpers.h"
 #include "SquareHelpers.h"
 #include "Zobrist.h"
 #include "Utils.h"
@@ -50,39 +51,40 @@ void Board::Init()
     memset(_movesWithoutCapture, 0, MaxGameLength*sizeof(int));
 }
 
-bool Board::IsLegal(Move const* const move) const
+bool Board::IsLegal(Move move) const
 {
-    assert(move != nullptr);
-    Square start = _board[move->Start()];
-    Square end = _board[move->End()];
+    assert(move != NoMove);
+    Square start = _board[GetStart(move)];
+    Square end = _board[GetEnd(move)];
     bool endOccupancy;
     bool startOccupancy = IsPiece(start) && GetOwner(start) == _playerToMove;
     if (startOccupancy)
         endOccupancy = end == Empty ||
-                       move->Rotation() ||
+                       GetRotation(move) != 0 ||
                        (GetPiece(start) == Piece::Scarab && (int)GetPiece(end) < 4);
 
     return startOccupancy && endOccupancy;
 }
 
-void Board::MakeMove(Move const* const move)
+void Board::MakeMove(Move move)
 {
-    assert(move != nullptr);
+    assert(move != NoMove);
     assert(!_drawn && !_checkmate);
     assert(IsLegal(move));
 
     auto z = Zobrist::Instance();
     uint64_t hash = _hashes[_moveNumber];
 
-    int start = move->Start();
-    int end = move->End();
+    int start = GetStart(move);
+    int end = GetEnd(move);
+    int rotation = GetRotation(move);
 
     Square movingPiece = _board[start];
     hash ^= z->Key(movingPiece, start);
 
-    if (move->Rotation() != 0)
+    if (rotation != 0)
     {
-        movingPiece = Rotate(movingPiece, move->Rotation());
+        movingPiece = Rotate(movingPiece, rotation);
     }
 
     _board[start] = _board[end];
@@ -106,7 +108,7 @@ void Board::MakeMove(Move const* const move)
 // Note: The move that needs to be undone should already be cached.
 void Board::UndoMove()
 {
-    Move const* const move = _moves[_moveNumber];
+    Move move = _moves[_moveNumber];
 
     // Restore any captured pieces.
     Square cap = _captureSquare[_moveNumber];
@@ -118,14 +120,16 @@ void Board::UndoMove()
         _board[capLoc] = cap;
     }
 
-    int start = move->Start();
-    int end = move->End();
+    int start = GetStart(move);
+    int end = GetEnd(move);
+    int rotation = GetRotation(move);
+
     Square movedPiece = _board[end];
 
-    if (move->Rotation() != 0)
+    if (rotation != 0)
     {
         // Reverse the rotation.
-        movedPiece = Rotate(movedPiece, -1*move->Rotation());
+        movedPiece = Rotate(movedPiece, -1*rotation);
     }
 
     _board[end] = _board[start];

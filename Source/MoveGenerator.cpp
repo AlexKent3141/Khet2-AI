@@ -1,4 +1,5 @@
 #include "MoveGenerator.h"
+#include "MoveHelpers.h"
 #include "SquareHelpers.h"
 #include <cstring>
 
@@ -11,9 +12,9 @@ MoveGenerator::MoveGenerator(const Board& board, int finalStage)
     }
 }
 
-MoveGenerator::MoveGenerator(const Board& board, Move* priorityMove, int finalStage)
+MoveGenerator::MoveGenerator(const Board& board, Move priorityMove, int finalStage)
 {
-    if (priorityMove != nullptr)
+    if (priorityMove != NoMove)
         _moveBuffers[Priority].push_back(priorityMove);
 
     _stoppedStage = finalStage + 1;
@@ -25,21 +26,10 @@ MoveGenerator::MoveGenerator(const Board& board, Move* priorityMove, int finalSt
 
 MoveGenerator::~MoveGenerator()
 {
-    // Free memory for any unused moves.
-    while (_stage != Done)
-    {
-        for (size_t i = _moveIndex + 1; i < _currentMoves->size(); i++)
-        {
-            delete (*_currentMoves)[i];
-        }
-
-        _moveIndex = -1;
-        NextStage();
-    }
 }
 
 // Get the next move.
-Move* MoveGenerator::Next()
+Move MoveGenerator::Next()
 {
     // Ensure that the current stage has moves.
     while (_stage != _stoppedStage && ++_moveIndex >= (int)_currentMoves->size())
@@ -48,7 +38,7 @@ Move* MoveGenerator::Next()
         NextStage();
     }
 
-    return _stage != _stoppedStage ? (*_currentMoves)[_moveIndex] : nullptr;
+    return _stage != _stoppedStage ? (*_currentMoves)[_moveIndex] : NoMove;
 }
 
 void MoveGenerator::NextStage()
@@ -145,19 +135,19 @@ void MoveGenerator::AddMove(const Board& board, int start, int end, int rotation
         if (Reflections[dirEnd][p - 2][o] == Dead)
         {
             if (!capturesOnly)
-                _moveBuffers[Suicide].push_back(new Move(start, end, rotation));
+                _moveBuffers[Suicide].push_back(MakeMove(start, end, rotation));
         }
         else
-            _moveBuffers[Dynamic].push_back(new Move(start, end, rotation));
+            _moveBuffers[Dynamic].push_back(MakeMove(start, end, rotation));
     }
     else
     {
         if (_passiveCapture)
-            _moveBuffers[Dynamic].push_back(new Move(start, end, rotation));
+            _moveBuffers[Dynamic].push_back(MakeMove(start, end, rotation));
         else
         {
             if (!capturesOnly)
-                _moveBuffers[Quiet].push_back(new Move(start, end, rotation));
+                _moveBuffers[Quiet].push_back(MakeMove(start, end, rotation));
         }
     }
 }

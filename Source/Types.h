@@ -4,6 +4,7 @@
 #include <cstdint>
 
 typedef uint8_t Square;
+typedef uint32_t Move;
 
 // The player types.
 enum class Player

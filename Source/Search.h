@@ -3,7 +3,7 @@
 
 #include "Board.h"
 #include "Evaluator.h"
-#include "Move.h"
+#include "Types.h"
 #include "SearchParams.h"
 #include "TranspositionTable.h"
 #include <ctime>
@@ -12,7 +12,7 @@ class Search
 {
 public:
     // Iterative deepening Minimax search.
-    Move* Start(TT&, const SearchParams&, Board&, int&);
+    Move Start(TT&, const SearchParams&, Board&, int&);
 
     // Stop the current search.
     void Stop();
@@ -27,7 +27,7 @@ private:
     void MateInfo(int) const;
 
     // Display the best move that was found.
-    void BestMove(const Move* const) const;
+    void BestMove(Move) const;
 
     clock_t TimeElapsed() const;
 
@@ -35,7 +35,7 @@ private:
     bool CheckTime() const;
 
     // This root call to the Alpha-Beta search returns the best root move.
-    Move* AlphaBetaRoot(TT&, const Evaluator&, Board&, int, int&);
+    Move AlphaBetaRoot(TT&, const Evaluator&, Board&, int, int&);
 
     // Score the given position using NegaMax with Alpha-Beta pruning.
     int AlphaBeta(TT&, const Evaluator&, Board&, int depth, int alpha, int beta, int sign);

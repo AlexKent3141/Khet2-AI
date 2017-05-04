@@ -3,7 +3,7 @@
 
 #include "Globals.h"
 #include "Board.h"
-#include "Move.h"
+#include "Types.h"
 
 // Generate all of the moves for the specified position in order of urgency.
 class MoveGenerator
@@ -18,10 +18,10 @@ public:
 
     MoveGenerator() = delete;
     MoveGenerator(const Board&, int finalStage = Suicide);
-    MoveGenerator(const Board&, Move*, int finalStage = Suicide);
+    MoveGenerator(const Board&, Move, int finalStage = Suicide);
     ~MoveGenerator();
 
-    Move* Next();
+    Move Next();
 
 private:
     bool _passiveCapture = false;
@@ -30,8 +30,8 @@ private:
     int _stoppedStage;
 
     // Maintain a buffer for each stage.
-    std::vector<Move*> _moveBuffers[Done];
-    std::vector<Move*>* _currentMoves = &_moveBuffers[Priority];
+    std::vector<Move> _moveBuffers[Done];
+    std::vector<Move>* _currentMoves = &_moveBuffers[Priority];
 
     // Cache the path of the laser.
     // Store the direction of the laser at each point.

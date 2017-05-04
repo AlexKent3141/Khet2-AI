@@ -25,6 +25,9 @@ const Square OffBoard = 0;
 // This constant is used to indicate that a location is empty.
 const Square Empty = 1;
 
+// This constant is used to indicate that no move was available.
+const Move NoMove = 0;
+
 // Movement directions.
 const std::vector<int> Directions = 
 {

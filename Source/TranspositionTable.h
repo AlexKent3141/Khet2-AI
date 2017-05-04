@@ -1,6 +1,7 @@
 #ifndef __TRANSPOSITION_TABLE_H__
 #define __TRANSPOSITION_TABLE_H__
 
+#include "Types.h"
 #include <unordered_map>
 
 typedef uint64_t Key;
@@ -17,14 +18,14 @@ class Entry
 {
 public:
     inline EntryType Type() const { return _type; }
-    inline Move* HashMove() const { return _move; }
+    inline Move HashMove() const { return _move; }
     inline int Depth() const { return _depth; }
     inline int Value() const { return _value; }
     inline int Age() const { return _age; }
 
     Entry() = delete;
 
-    Entry(EntryType type, Move* move, int depth, int value) :
+    Entry(EntryType type, Move move, int depth, int value) :
         _type(type), _move(move), _depth(depth), _value(value), _age(0)
     {
     }
@@ -50,18 +51,9 @@ public:
         return *this;
     }
 
-    ~Entry()
-    {
-        if (_move != nullptr)
-        {
-            delete _move;
-            _move = nullptr;
-        }
-    }
-
 private:
     EntryType _type;
-    Move* _move = nullptr;
+    Move _move = NoMove;
     int _depth;
     int _value;
     int _age;
@@ -69,7 +61,7 @@ private:
     void CopyFrom(const Entry& other)
     {
         _type = other._type;
-        _move = other._move != nullptr ? new Move(*other._move) : nullptr;
+        _move = other._move;
         _depth = other._depth;
         _value = other._value;
         _age = other._age;
@@ -81,7 +73,7 @@ class TranspositionTable
 public:
     // Insert the specified key-value pair in the table.
     // This method decides whether the perform replacement.
-    void Insert(Key key, EntryType type, Move* move, int depth, int value)
+    void Insert(Key key, EntryType type, Move move, int depth, int value)
     {
         auto e = _map.find(key);
         if (e != _map.end())

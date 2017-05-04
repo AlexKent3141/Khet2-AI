@@ -1,12 +1,13 @@
 #include "Search.h"
 #include "Evaluator.h"
 #include "MoveGenerator.h"
+#include "MoveHelpers.h"
 #include <iostream>
 #include <cassert>
 #include <climits>
 
 // Iterative deepening framework.
-Move* Search::Start(TT& table, const SearchParams& params, Board& board, int& score)
+Move Search::Start(TT& table, const SearchParams& params, Board& board, int& score)
 {
     const int MaxDepth = 100;
 
@@ -14,7 +15,7 @@ Move* Search::Start(TT& table, const SearchParams& params, Board& board, int& sc
     _params = params;
     _startTime = clock();
 
-    Move* bestMove = nullptr, *tempMove = nullptr;
+    Move bestMove = NoMove, tempMove = NoMove;
     int tempScore;
     bool keepSearching = true;
 
@@ -27,9 +28,6 @@ Move* Search::Start(TT& table, const SearchParams& params, Board& board, int& sc
         keepSearching = CheckTime();
         if (keepSearching)
         {
-            if (bestMove != nullptr)
-                delete bestMove;
-
             bestMove = tempMove;
             score = tempScore;
 
@@ -77,9 +75,9 @@ void Search::MateInfo(int pliesToMate) const
               << " mate " << pliesToMate << std::endl;
 }
 
-void Search::BestMove(const Move* const move) const
+void Search::BestMove(Move move) const
 {
-    std::string m = move != nullptr ? move->ToString() : "none";
+    std::string m = move != NoMove ? ToString(move) : "none";
     std::cout << "bestmove " << m << std::endl;
 }
 
@@ -101,10 +99,10 @@ bool Search::CheckTime() const
 }
 
 // Initial alpha-beta call which assesses the root nodes and returns the best move.
-Move* Search::AlphaBetaRoot(TT& table, const Evaluator& eval, Board& board, int depth, int& score)
+Move Search::AlphaBetaRoot(TT& table, const Evaluator& eval, Board& board, int depth, int& score)
 {
     score = INT_MIN;
-    Move* bestMove = nullptr;
+    Move bestMove = NoMove;
     int sign = board.PlayerToMove() == Player::Silver ? 1 : -1;
     if (depth == 0 || board.IsCheckmate() || board.IsDraw())
     {
@@ -113,9 +111,9 @@ Move* Search::AlphaBetaRoot(TT& table, const Evaluator& eval, Board& board, int 
     else
     {
         MoveGenerator gen(board);
-        Move* move;
+        Move move = NoMove;
         int val;
-        while ((move = gen.Next()) != nullptr)
+        while ((move = gen.Next()) != NoMove)
         {
             board.MakeMove(move);
             val = -AlphaBeta(table, eval, board, depth-1, INT_MIN, INT_MAX, -sign);
@@ -125,13 +123,8 @@ Move* Search::AlphaBetaRoot(TT& table, const Evaluator& eval, Board& board, int 
             if (val > score)
             {
                 score = std::max(score, val);
-                if (bestMove != nullptr)
-                    delete bestMove;
-
-                bestMove = new Move(*move);
+                bestMove = move;
             }
-
-            delete move;
         }
     }
 
@@ -154,7 +147,7 @@ int Search::AlphaBeta(TT& table, const Evaluator& eval, Board& board, int depth,
         int alphaOrig = alpha;
 
         // Lookup the current position in the TT.
-        Move* hashMove = nullptr;
+        Move hashMove = NoMove;
         Entry* e = table.Find(board.HashKey());
         if (e != nullptr && e->Depth() >= depth)
         {
@@ -168,16 +161,16 @@ int Search::AlphaBeta(TT& table, const Evaluator& eval, Board& board, int depth,
             if (alpha >= beta)
                 return e->Value();
 
-            Move* hashMove = e->HashMove();
-            if (hashMove != nullptr && board.IsLegal(hashMove))
-                hashMove = new Move(*hashMove);
+            Move hashMove = e->HashMove();
+            if (hashMove != NoMove && board.IsLegal(hashMove))
+                hashMove = hashMove;
         }
 
         MoveGenerator gen(board, hashMove);
-        Move* move = nullptr;
+        Move move = NoMove;
         int val;
         bool inTime = false;
-        while ((move = gen.Next()) != nullptr && (inTime = CheckTime()))
+        while ((move = gen.Next()) != NoMove && (inTime = CheckTime()))
         {
             board.MakeMove(move);
             val = -AlphaBeta(table, eval, board, depth-1, -beta, -alpha, -sign);
@@ -190,9 +183,6 @@ int Search::AlphaBeta(TT& table, const Evaluator& eval, Board& board, int depth,
             {
                 break;
             }
-
-            delete move;
-            move = nullptr;
         }
 
         // Insert the newly evaluated position.
@@ -215,14 +205,13 @@ int Search::Quiesce(const Evaluator& eval, Board& board, int depth, int alpha, i
         alpha = std::max(alpha, score);
 
         MoveGenerator gen(board, MoveGenerator::Dynamic);
-        Move* move;
+        Move move = NoMove;
         int val;
-        while ((move = gen.Next()) != nullptr && CheckTime())
+        while ((move = gen.Next()) != NoMove && CheckTime())
         {
             board.MakeMove(move);
             val = -Quiesce(eval, board, depth-1, -beta, -alpha, -sign);
             board.UndoMove();
-            delete move;
 
             // Update the bounds.
             score = std::max(score, val);

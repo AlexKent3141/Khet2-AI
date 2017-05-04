@@ -36,14 +36,13 @@ private:
     {
         MoveGenerator gen(board);
         int cmp = 0;
-        Move* move = nullptr;
-        while (cmp == 0 && (move = gen.Next()) != nullptr)
+        Move move = NoMove;
+        while (cmp == 0 && (move = gen.Next()) != NoMove)
         {
             Board original(board);
             board.MakeMove(move);
             board.UndoMove();
             cmp = board.Compare(original);
-            delete move;
         }
 
         if (cmp != 0)
