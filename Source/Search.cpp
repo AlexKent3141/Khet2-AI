@@ -149,19 +149,19 @@ int Search::AlphaBeta(TT& table, const Evaluator& eval, Board& board, int depth,
         // Lookup the current position in the TT.
         Move hashMove = NoMove;
         Entry* e = table.Find(board.HashKey());
-        if (e != nullptr && e->Depth() >= depth)
+        if (e != nullptr && e->Depth >= depth)
         {
-            if (e->Type() == EntryType::Exact)
-                return e->Value();
-            else if (e->Type() == EntryType::Alpha)
-                alpha = std::max(alpha, e->Value());
+            if (e->Type == EntryType::Exact)
+                return e->Value;
+            else if (e->Type == EntryType::Alpha)
+                alpha = std::max(alpha, e->Value);
             else
-                beta = std::min(beta, e->Value());
+                beta = std::min(beta, e->Value);
 
             if (alpha >= beta)
-                return e->Value();
+                return e->Value;
 
-            Move hashMove = e->HashMove();
+            Move hashMove = e->HashMove;
             if (hashMove != NoMove && board.IsLegal(hashMove))
                 hashMove = hashMove;
         }

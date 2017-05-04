@@ -24,10 +24,6 @@ MoveGenerator::MoveGenerator(const Board& board, Move priorityMove, int finalSta
     }
 }
 
-MoveGenerator::~MoveGenerator()
-{
-}
-
 // Get the next move.
 Move MoveGenerator::Next()
 {

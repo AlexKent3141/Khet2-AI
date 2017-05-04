@@ -10,16 +10,18 @@ class MoveGenerator
 {
 public:
     // Which stage of moves we are currently on.
-    static const int Priority = 0;
-    static const int Dynamic = 1;
-    static const int Quiet = 2;
-    static const int Suicide = 3;
-    static const int Done = 4;
+    enum Stage
+    {
+        Priority = 0,
+        Dynamic = 1,
+        Quiet = 2,
+        Suicide = 3,
+        Done = 4
+    };
 
     MoveGenerator() = delete;
     MoveGenerator(const Board&, int finalStage = Suicide);
     MoveGenerator(const Board&, Move, int finalStage = Suicide);
-    ~MoveGenerator();
 
     Move Next();
 
