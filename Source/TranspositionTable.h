@@ -1,6 +1,7 @@
 #ifndef __TRANSPOSITION_TABLE_H__
 #define __TRANSPOSITION_TABLE_H__
 
+#include "Types.h"
 #include <unordered_map>
 
 typedef uint64_t Key;
@@ -13,67 +14,13 @@ enum class EntryType
 };
 
 // The format of a single TT entry.
-class Entry
+struct Entry
 {
-public:
-    inline EntryType Type() const { return _type; }
-    inline Move* HashMove() const { return _move; }
-    inline int Depth() const { return _depth; }
-    inline int Value() const { return _value; }
-    inline int Age() const { return _age; }
-
-    Entry() = delete;
-
-    Entry(EntryType type, Move* move, int depth, int value) :
-        _type(type), _move(move), _depth(depth), _value(value), _age(0)
-    {
-    }
-
-    Entry(const Entry& other)
-    {
-        CopyFrom(other);
-    }
-
-    Entry& operator=(const Entry& other)
-    {
-        if (this != &other)
-        {
-            CopyFrom(other);
-        }
-
-        return *this;
-    }
-
-    Entry& operator++(int)
-    {
-        ++_age;
-        return *this;
-    }
-
-    ~Entry()
-    {
-        if (_move != nullptr)
-        {
-            delete _move;
-            _move = nullptr;
-        }
-    }
-
-private:
-    EntryType _type;
-    Move* _move = nullptr;
-    int _depth;
-    int _value;
-    int _age;
-
-    void CopyFrom(const Entry& other)
-    {
-        _type = other._type;
-        _move = other._move != nullptr ? new Move(*other._move) : nullptr;
-        _depth = other._depth;
-        _value = other._value;
-        _age = other._age;
-    }
+    EntryType Type;
+    Move HashMove;
+    int Depth;
+    int Value;
+    int Age;
 };
 
 class TranspositionTable
@@ -81,20 +28,20 @@ class TranspositionTable
 public:
     // Insert the specified key-value pair in the table.
     // This method decides whether the perform replacement.
-    void Insert(Key key, EntryType type, Move* move, int depth, int value)
+    void Insert(Key key, EntryType type, Move move, int depth, int value)
     {
         auto e = _map.find(key);
         if (e != _map.end())
         {
             // Should this entry be replaced with the new one?
-            if (e->second.Depth() < depth)
+            if (e->second.Depth < depth)
             {
-                e->second = Entry(type, move, depth, value);
+                e->second = { type, move, depth, value };
             }
         }
         else
         {
-            _map.insert(std::make_pair(key, Entry(type, move, depth, value)));
+            _map.insert({ key, { type, move, depth, value } });
         }
     }
 
@@ -112,8 +59,8 @@ public:
         auto e = _map.begin();
         while (e != _map.end())
         {
-            e->second++;
-            e = e->second.Age() > MaxAge
+            e->second.Age++;
+            e = e->second.Age > MaxAge
                 ? _map.erase(e)
                 : std::next(e);
         }

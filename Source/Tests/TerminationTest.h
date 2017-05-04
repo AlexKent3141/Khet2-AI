@@ -6,7 +6,6 @@
 #include "../EvalParams.h"
 #include "../Evaluator.h"
 #include "../Globals.h"
-#include "../Move.h"
 #include "../MoveGenerator.h"
 #include <cassert>
 #include <cstdlib>
@@ -45,19 +44,17 @@ private:
 
         bool success = true;
         const int NumTests = 1000;
-        Move* move;
+        Move move = NoMove;
         int j, playoutLengthTotal = 0, numDraws = 0;
         for (int i = 0; success && i < NumTests; i++)
         {
             Board board(khetPos);
             for (j = 0; j < MaxGameLength; j++)
             {
-                if ((move = GetRandomMove(board)) != nullptr)
+                if ((move = GetRandomMove(board)) != NoMove)
                 {
                     // Make the move.
                     board.MakeMove(move);
-                    delete move;
-                    move = nullptr;
                 }
                 else
                 {
@@ -108,13 +105,13 @@ private:
         return success;
     }
 
-    Move* GetRandomMove(const Board& board)
+    Move GetRandomMove(const Board& board)
     {
         // Get all of the moves.
-        Move* move = nullptr;
+        Move move = NoMove;
         MoveGenerator gen(board);
-        std::vector<Move*> moves;
-        while ((move = gen.Next()) != nullptr)
+        std::vector<Move> moves;
+        while ((move = gen.Next()) != NoMove)
         {
             moves.push_back(move);
         }
@@ -123,12 +120,6 @@ private:
         {
             // Select a move randomly.
             move = moves[rand() % moves.size()];
-
-            // Delete all moves that aren't the selected one.
-            for (size_t i = 0; i < moves.size(); i++)
-            {
-                if (moves[i] != move) delete moves[i];
-            }
         }
 
         return move;

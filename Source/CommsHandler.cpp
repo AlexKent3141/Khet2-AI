@@ -1,5 +1,7 @@
 #include "CommsHandler.h"
+#include "MoveHelpers.h"
 #include "Utils.h"
+#include "Types.h"
 #include <cassert>
 #include <iostream>
 
@@ -80,12 +82,11 @@ Board* CommsHandler::CreatePosition(const std::vector<std::string>& tokens) cons
     }
 
     // Apply the moves that have been specified.
-    Move* move = nullptr;
+    Move move = NoMove;
     for (size_t i = movesIndex; i < tokens.size(); i++)
     {
-        move = new Move(tokens[i]);
+        move = MakeMove(tokens[i]);
         board->MakeMove(move);
-        delete move;
     }
 
     return board;
