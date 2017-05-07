@@ -37,6 +37,30 @@ class PositionGenerator:
 
         return self.__khet_str(board, orientations)
 
+    def check_balanced(self, start_pos, path_to_ai1, path_to_ai2, time_to_check):
+        ai1 = AIProcess(path_to_ai1)
+        ai2 = AIProcess(path_to_ai2)
+
+        balanced_threshold = 500 # Equivalent to 1/2 pyramids.
+
+        balanced = True
+
+        if ai1.start() and ai2.start():
+            ai1.new_game(start_pos)
+            ai2.new_game(start_pos)
+
+            ai1.search(time_to_check)
+            ai2.search(time_to_check)
+
+            balanced = not ai1.mate_detected and not ai2.mate_detected and \
+                       not abs(ai1.latest_eval) > balanced_threshold and \
+                       not abs(ai2.latest_eval) > balanced_threshold
+
+        ai1.quit()
+        ai2.quit()
+
+        return balanced
+
     def __khet_str(self, board, orientations):
         ks = ""
         for r in range(7, -1, -1):
@@ -74,7 +98,8 @@ class AIProcess:
         self.new_game()
 
     def start(self):
-        self.proc = pexpect.spawn(self.path)
+        if self.proc == None:
+            self.proc = pexpect.spawn(self.path)
         return self.proc != None
 
     def new_game(self, start_pos = "standard"):
@@ -213,7 +238,13 @@ def ai_tournament(path_to_ai1, path_to_ai2, num_positions, time_per_move):
     one_points = 0
     games = 0
     for p in range(0, num_positions):
-        pos = gen.generate()
+        # Generate a (probably balanced) initial position.
+        balanced = False
+        while not balanced:
+            pos = gen.generate()
+            balanced = gen.check_balanced(pos, path_to_ai1, path_to_ai2, time_per_move)
+
+        print pos
 
         # The AI's much play both sides of this position.
         score = ai_vs_ai(path_to_ai1, path_to_ai2, time_per_move, pos)
