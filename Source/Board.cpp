@@ -276,7 +276,7 @@ void Board::ParseLine(int index, const std::string& line)
             Piece piece = PieceFromChar(line[i]);
 
             Orientation orientation = piece == Piece::Pharaoh ? 
-                Orientation::Up : (Orientation)(line[++i] - 1 - '0');
+                Orientation::Up : (Orientation)(line[++i] - '0');
 
             Square sq = MakeSquare(player, piece, orientation);
             hash ^= z->Key(sq, boardIndex);
