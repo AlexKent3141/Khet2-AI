@@ -24,7 +24,7 @@ int Evaluator::Distance(int loc1, int loc2) const
 {
     int xDiff = std::abs((loc1 - loc2) % BoardWidth);
     int yDiff = std::abs((loc1 - loc2) / BoardWidth);
-    return xDiff + yDiff;
+    return std::max(xDiff, yDiff);
 }
 
 bool Evaluator::TerminalScore(const Board& board, int* score) const
