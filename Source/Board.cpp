@@ -14,6 +14,7 @@ Board::Board(const Board& other)
     _playerToMove = other._playerToMove;
     memcpy(_hashes, other._hashes, MaxGameLength*sizeof(uint64_t));
     memcpy(_board, other._board, BoardArea*sizeof(Square));
+    memcpy(_pharaohPositions, other._pharaohPositions, 2*sizeof(int));
 }
 
 Board::Board(const std::string& ks)
@@ -91,6 +92,12 @@ void Board::MakeMove(Move move)
     _board[end] = movingPiece;
     hash ^= z->Key(movingPiece, end);
 
+    // Update pharaoh positions.
+    if (GetPiece(movingPiece) == Piece::Pharaoh)
+    {
+        _pharaohPositions[(int)_playerToMove] = end;
+    }
+
     // Check whether pieces are captured.
     int prevMovesWithoutCapture = _movesWithoutCapture[_moveNumber];
     ++_moveNumber;
@@ -138,6 +145,12 @@ void Board::UndoMove()
     _checkmate = false;
     _drawn = false;
     _playerToMove = _playerToMove == Player::Silver ? Player::Red : Player::Silver;
+
+    // Update pharaoh positions.
+    if (GetPiece(movedPiece) == Piece::Pharaoh)
+    {
+        _pharaohPositions[(int)_playerToMove] = start;
+    }
 }
 
 // Check whether the game is now drawn.
@@ -275,8 +288,16 @@ void Board::ParseLine(int index, const std::string& line)
             Player player = isupper(line[i]) ? Player::Silver : Player::Red;
             Piece piece = PieceFromChar(line[i]);
 
-            Orientation orientation = piece == Piece::Pharaoh ? 
-                Orientation::Up : (Orientation)(line[++i] - 1 - '0');
+            Orientation orientation;
+            if (piece == Piece::Pharaoh)
+            {
+                orientation = Orientation::Up;
+                _pharaohPositions[(int)player] = boardIndex;
+            }
+            else
+            {
+                orientation = (Orientation)(line[++i] - 1 - '0');
+            }
 
             Square sq = MakeSquare(player, piece, orientation);
             hash ^= z->Key(sq, boardIndex);

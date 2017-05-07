@@ -20,19 +20,17 @@ private:
 
     int Distance(int, int) const;
 
-    int FindPharaoh(Player, const Board&) const;
-
     // Check if the board is in a terminal state and score appropriately if so.
     bool TerminalScore(const Board&, int*) const;
 
     // Compute the material part of the evaluation.
-    int MaterialScore(int, int, const Board&) const;
+    int MaterialScore(const Board&) const;
 
     // Compute the "laserability" part of the evaluation.
-    int LaserableScore(int, int, const Board&) const;
+    int LaserableScore(const Board&) const;
 
     // Compute the number of laserable squares for the specified player.
-    int LaserableScore(Player, int, const Board&) const;
+    inline int LaserableScore(Player, const Board&) const;
 };
 
 #endif // __EVALUATOR_H__

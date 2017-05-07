@@ -24,6 +24,7 @@ public:
     inline bool IsDraw() const { return _drawn; }
     inline Square LastCapture() const { return _captureSquare[_moveNumber]; }
     inline uint64_t HashKey() const { return _hashes[_moveNumber]; }
+    inline int PharaohPosition(Player player) const { return _pharaohPositions[(int)player]; }
 
     // Making/unmaking moves.
     void MakeMove(Move);
@@ -42,6 +43,9 @@ private:
 
     // Move list.
     Move _moves[MaxGameLength] = { NoMove };
+
+    // The current pharaoh positions.
+    int _pharaohPositions[2];
 
     // Cache the capture square and location so that it can be restored.
     Square _captureSquare[MaxGameLength];
