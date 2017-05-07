@@ -13,11 +13,13 @@ public:
     {
         // Setup the default parameter configuration.
         // With the piece vals only the Anubis and Pyramid values are significant.
-        const int AnubisVal = 400;
+        const int AnubisVal = 500;
         const int PyramidVal = 1000;
         _pieceVals = new int[7] { 0, 0, AnubisVal, PyramidVal, 0, 0, 0 };
         _pieceToPharaohVals = new int[16] 
-            { 0, 200, 100, 50, 25, 10, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            { 0, 50, 40, 30, 20, 10, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        _laserToPharaohVals = new int[16] 
+            { 0, 200, 50, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
         _laserVal = 20;
 
         // This evaluation is only attainable if a player is in checkmate.
@@ -36,6 +38,12 @@ public:
         {
             delete _pieceToPharaohVals;
             _pieceToPharaohVals = nullptr;
+        }
+
+        if (_laserToPharaohVals != nullptr)
+        {
+            delete _laserToPharaohVals;
+            _laserToPharaohVals = nullptr;
         }
     }
 
@@ -56,12 +64,14 @@ public:
 
     inline int PieceVal(Piece p) const { return _pieceVals[(int)p]; }
     inline int PiecePharaohVal(int dist) const { return _pieceToPharaohVals[dist]; }
+    inline int LaserPharaohVal(int dist) const { return _laserToPharaohVals[dist]; }
     inline int LaserVal() const { return _laserVal; }
     inline int CheckmateVal() const { return _checkmateVal; }
     
 private:
     int* _pieceVals = nullptr;
     int* _pieceToPharaohVals = nullptr;
+    int* _laserToPharaohVals = nullptr;
     int _laserVal;
     int _checkmateVal;
 
@@ -69,6 +79,7 @@ private:
     {
         memcpy(_pieceVals, other._pieceVals, 7*sizeof(int));
         memcpy(_pieceToPharaohVals, other._pieceToPharaohVals, 16*sizeof(int));
+        memcpy(_laserToPharaohVals, other._laserToPharaohVals, 16*sizeof(int));
         _laserVal = other._laserVal;
         _checkmateVal = other._checkmateVal;
     }

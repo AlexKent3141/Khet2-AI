@@ -26,13 +26,13 @@ private:
     bool TerminalScore(const Board&, int*) const;
 
     // Compute the material part of the evaluation.
-    int MaterialScore(const Board&) const;
+    int MaterialScore(int, int, const Board&) const;
 
     // Compute the "laserability" part of the evaluation.
-    int LaserableScore(const Board&) const;
+    int LaserableScore(int, int, const Board&) const;
 
     // Compute the number of laserable squares for the specified player.
-    int LaserableScore(Player, const Board&) const;
+    int LaserableScore(Player, int, const Board&) const;
 };
 
 #endif // __EVALUATOR_H__
