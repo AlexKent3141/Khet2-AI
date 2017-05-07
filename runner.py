@@ -11,8 +11,9 @@ class PositionGenerator:
 
         # Place the sphinxes with the typical locations and orientations.
         board[9] = 'X'
+        orientations[9] = 1
         board[70] = 'x'
-        orientations[70] = 2
+        orientations[70] = 3
 
         # Place the remaining pieces randomly.
         while pieces_to_place:
@@ -28,12 +29,12 @@ class PositionGenerator:
             board[loc] = p
 
             # Choose a random orientation.
-            o = random.randint(0, 3)
+            o = random.randint(1, 4)
             orientations[loc] = o
 
             # Place the mirrored red piece.
             board[79-loc] = p.lower()
-            orientations[79-loc] = o+2 if o < 2 else o-2
+            orientations[79-loc] = o+2 if o < 3 else o-2
 
         return self.__khet_str(board, orientations)
 
