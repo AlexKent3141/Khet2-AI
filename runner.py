@@ -39,8 +39,8 @@ class PositionGenerator:
 
     def __khet_str(self, board, orientations):
         ks = ""
-        space = 0
         for r in range(7, -1, -1):
+            space = 0
             for c in range(0, 10):
                 i = 10*r + c
                 if board[i]:
