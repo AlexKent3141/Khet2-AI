@@ -167,6 +167,7 @@ int Search::AlphaBeta(TT& table, const Evaluator& eval, Board& board, int depth,
         }
 
         MoveGenerator gen(board, hashMove);
+        gen.Sort(MoveGenerator::Quiet, _history);
         Move move = NoMove;
         int val;
         bool inTime = false;
@@ -181,6 +182,8 @@ int Search::AlphaBeta(TT& table, const Evaluator& eval, Board& board, int depth,
             alpha = std::max(alpha, val);
             if (alpha >= beta)
             {
+                // The move caused a cut-off so increase its historical score.
+                _history.IncrementScore(board.PlayerToMove(), move, depth);
                 break;
             }
         }

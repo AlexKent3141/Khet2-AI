@@ -3,6 +3,7 @@
 
 #include "Board.h"
 #include "Evaluator.h"
+#include "History.h"
 #include "Types.h"
 #include "SearchParams.h"
 #include "TranspositionTable.h"
@@ -21,6 +22,7 @@ private:
     bool _stopped;
     SearchParams _params;
     clock_t _startTime;
+    History _history;
 
     // Display an info string for the current search.
     void ScoreInfo(int, int) const;

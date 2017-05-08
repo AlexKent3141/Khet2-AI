@@ -1,8 +1,9 @@
 #ifndef __MOVE_GENERATOR_H__
 #define __MOVE_GENERATOR_H__
 
-#include "Globals.h"
 #include "Board.h"
+#include "Globals.h"
+#include "History.h"
 #include "Types.h"
 
 // Generate all of the moves for the specified position in order of urgency.
@@ -23,6 +24,9 @@ public:
     MoveGenerator(const Board&, int finalStage = Suicide);
     MoveGenerator(const Board&, Move, int finalStage = Suicide);
 
+    // Sort the moves in the specified stage according to historical score.
+    void Sort(Stage, const History&);
+
     Move Next();
 
 private:
@@ -30,6 +34,7 @@ private:
     int _moveIndex = -1;
     int _stage = Priority;
     int _stoppedStage;
+    Player _playerToMove;
 
     // Maintain a buffer for each stage.
     std::vector<Move> _moveBuffers[Done];

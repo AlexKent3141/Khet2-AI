@@ -1,3 +1,6 @@
+#ifndef __MOVE_HELPERS_H__
+#define __MOVE_HELPERS_H__
+
 #include "Globals.h"
 #include <string>
 #include <cassert>
@@ -60,3 +63,5 @@ inline std::string ToString(Move m)
     s += start != end ? LocationToString(end) : (rotation > 0 ? "+" : "-");
     return s;
 }
+
+#endif // __MOVE_HELPERS_H__

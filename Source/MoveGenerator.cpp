@@ -1,6 +1,7 @@
 #include "MoveGenerator.h"
 #include "MoveHelpers.h"
 #include "SquareHelpers.h"
+#include <algorithm>
 #include <cstring>
 
 MoveGenerator::MoveGenerator(const Board& board, int finalStage)
@@ -48,14 +49,14 @@ void MoveGenerator::Generate(const Board& board)
 {
     FireLaser(board);
 
-    Player player = board.PlayerToMove();
+    _playerToMove = board.PlayerToMove();
     Piece piece;
 
     // Iterate over the pieces.
     for (int i = 0; i < BoardArea; i++)
     {
         Square s = board.Get(i);
-        if (IsPiece(s) && GetOwner(s) == player)
+        if (IsPiece(s) && GetOwner(s) == _playerToMove)
         {
             piece = GetPiece(s);
 
@@ -80,6 +81,18 @@ void MoveGenerator::Generate(const Board& board)
                 break;
             }
         }
+    }
+}
+
+void MoveGenerator::Sort(Stage stage, const History& history)
+{
+    if (_moveBuffers[stage].size() > 0)
+    {
+        std::sort(_moveBuffers[stage].begin(), _moveBuffers[stage].end(),
+            [&] (const Move& m1, const Move& m2)
+        {
+            return history.Score(_playerToMove, m1) > history.Score(_playerToMove, m2);
+        });
     }
 }
 
