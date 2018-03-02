@@ -11,6 +11,8 @@ class Evaluator
 public:
     Evaluator();
     Evaluator(const EvalParams&);
+
+    int MaxScore() const { return _params.CheckmateVal(); }
     
     // Evaluate the specified position.
     int operator()(const Board&) const;
