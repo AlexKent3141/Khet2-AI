@@ -4,6 +4,7 @@
 #include "Board.h"
 #include "Globals.h"
 #include "History.h"
+#include "Laser.h"
 #include "Types.h"
 
 // Generate all of the moves for the specified position in order of urgency.
@@ -35,16 +36,11 @@ private:
     int _stage = Priority;
     int _stoppedStage;
     Player _playerToMove;
+    Laser _laser;
 
     // Maintain a buffer for each stage.
     std::vector<Move> _moveBuffers[Done];
     std::vector<Move>* _currentMoves = &_moveBuffers[Priority];
-
-    // Cache the path of the laser.
-    // Store the direction of the laser at each point.
-    int _laserPath[BoardArea];
-
-    void FireLaser(const Board&);
 
     void AddMove(const Board&, int, int, int);
 

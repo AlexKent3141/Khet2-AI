@@ -2,12 +2,14 @@
 #define __BOARD_H__
 
 #include "Globals.h"
+#include "ILaserable.h"
+#include "Laser.h"
 #include "Types.h"
 #include <string>
 
 // Represents the Khet board state.
 // Exposes methods for updating the state.
-class Board
+class Board : public ILaserable
 {
 public:
     Board() = delete;
@@ -37,6 +39,7 @@ private:
     bool _checkmate = false, _drawn = false;
     int _moveNumber = 0;
     uint64_t _hashes[MaxGameLength];
+    Laser _laser;
 
     // Mailbox style storage is used with one layer of padding.
     Square _board[BoardArea];
@@ -55,8 +58,6 @@ private:
     int _movesWithoutCapture[MaxGameLength];
 
     void Init();
-
-    bool FireLaser(uint64_t&);
 
     void CheckForDraw();
 

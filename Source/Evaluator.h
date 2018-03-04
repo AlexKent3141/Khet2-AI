@@ -4,6 +4,7 @@
 #include "Board.h"
 #include "EvalParams.h"
 #include "Globals.h"
+#include "Laser.h"
 
 // This class contains methods that are used to evaluate a board position.
 class Evaluator
@@ -18,6 +19,7 @@ public:
     int operator()(const Board&) const;
 
 private:
+    static Laser _laser;
     EvalParams _params;
 
     int Distance(int, int) const;

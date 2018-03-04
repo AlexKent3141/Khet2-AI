@@ -47,12 +47,11 @@ void MoveGenerator::NextStage()
 // Generate all of the moves and cache them as either captures or quiet.
 void MoveGenerator::Generate(const Board& board)
 {
-    FireLaser(board);
-
     _playerToMove = board.PlayerToMove();
-    Piece piece;
+    _passiveCapture = _laser.Fire(_playerToMove, board);
 
     // Iterate over the pieces.
+    Piece piece;
     for (int i = 0; i < BoardArea; i++)
     {
         Square s = board.Get(i);
@@ -96,42 +95,12 @@ void MoveGenerator::Sort(Stage stage, const History& history)
     }
 }
 
-void MoveGenerator::FireLaser(const Board& board)
-{
-    memset(_laserPath, -1, BoardArea*sizeof(int));
-
-    // Find the starting location and direction for the laser beam.
-    int loc = Sphinx[(int)board.PlayerToMove()];
-    int dirIndex = GetOrientation(board.Get(loc));
-    int dir, p;
-    Square dest = Empty;
-    while (dest != OffBoard && dirIndex >= 0)
-    {
-        _laserPath[loc] = dirIndex;
-
-        dir = Directions[dirIndex];
-
-        // Take a step with the laser beam.
-        loc += dir;
-
-        // Is this location occupied?
-        dest = board.Get(loc);
-        if (IsPiece(dest))
-        {
-            p = (int)GetPiece(dest);
-            dirIndex = Reflections[dirIndex][p - 2][GetOrientation(dest)];
-        }
-    }
-
-    _passiveCapture = dirIndex == Dead;
-}
-
 // Add the specified move to one of the caches.
 void MoveGenerator::AddMove(const Board& board, int start, int end, int rotation)
 {
     // Is this move dynamic and not obviously losing?
     bool capturesOnly = _stoppedStage == Quiet;
-    int dirEnd = _laserPath[end];
+    int dirEnd = _laser.PathAt(end);
     if (dirEnd >= 0)
     {
         // Does this piece die?

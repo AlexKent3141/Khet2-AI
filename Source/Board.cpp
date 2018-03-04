@@ -74,7 +74,7 @@ void Board::MakeMove(Move move)
     assert(IsLegal(move));
 
     auto z = Zobrist::Instance();
-    uint64_t hash = _hashes[_moveNumber];
+    uint64_t hash = _hashes[_moveNumber++];
 
     int start = GetStart(move);
     int end = GetEnd(move);
@@ -99,9 +99,20 @@ void Board::MakeMove(Move move)
     }
 
     // Check whether pieces are captured.
-    int prevMovesWithoutCapture = _movesWithoutCapture[_moveNumber];
-    ++_moveNumber;
-    _movesWithoutCapture[_moveNumber] = FireLaser(hash) ? 0 : prevMovesWithoutCapture + 1;
+    if (_laser.Fire(_playerToMove, *this))
+    {
+        _movesWithoutCapture[_moveNumber] = 0;
+        _captureSquare[_moveNumber] = _laser.TargetSquare();
+        _captureLocation[_moveNumber] = _laser.TargetIndex();
+        _board[_laser.TargetIndex()] = Empty;
+        _checkmate |= _laser.TargetPiece() == (int)Piece::Pharaoh;
+        hash ^= Zobrist::Instance()->Key(_laser.TargetSquare(), _laser.TargetIndex());
+    }
+    else
+    {
+        _movesWithoutCapture[_moveNumber] = _movesWithoutCapture[_moveNumber - 1] + 1;
+        _captureSquare[_moveNumber] = Empty;
+    }
 
     _playerToMove = _playerToMove == Player::Silver ? Player::Red : Player::Silver;
     hash ^= z->Silver();
@@ -171,43 +182,6 @@ void Board::CheckForDraw()
 
         _drawn = numRepeats >= RepetitionLimit;
     }
-}
-
-bool Board::FireLaser(uint64_t& hash)
-{
-    // Find the starting location and direction for the laser beam.
-    int loc = Sphinx[(int)_playerToMove];
-    int dirIndex = GetOrientation(_board[loc]);
-    int dir, p = 0;
-    Square dest = Empty;
-    while (dest != OffBoard && dirIndex >= 0)
-    {
-        dir = Directions[dirIndex];
-
-        // Take a step with the laser beam.
-        loc += dir;
-
-        // Is this location occupied?
-        dest = _board[loc];
-        if (IsPiece(dest))
-        {
-            p = (int)GetPiece(dest);
-            dirIndex = Reflections[dirIndex][p - 2][GetOrientation(dest)];
-        }
-    }
-
-    // Was there a capture?
-    _captureSquare[_moveNumber] = Empty;
-    if (dirIndex == Dead)
-    {
-        _captureSquare[_moveNumber] = dest;
-        _captureLocation[_moveNumber] = loc;
-        _board[loc] = Empty;
-        _checkmate |= p == (int)Piece::Pharaoh;
-        hash ^= Zobrist::Instance()->Key(dest, loc);
-    }
-
-    return dirIndex == Dead;
 }
 
 // Serialise the board to a human-readable string.

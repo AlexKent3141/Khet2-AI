@@ -2,6 +2,8 @@
 #include "Globals.h"
 #include "SquareHelpers.h"
 
+Laser Evaluator::_laser = Laser();
+
 Evaluator::Evaluator()
 {
     _params = EvalParams();
@@ -70,37 +72,6 @@ int Evaluator::LaserableScore(const Board& board) const
 
 int Evaluator::LaserableScore(Player player, const Board& board) const
 {
-    int squares = 0;
-    int bonus = 0;
-    int enemyPharaoh = board.PharaohPosition(
-        player == Player::Silver ? Player::Red : Player::Silver);
-
-    // Find the starting location and direction for the laser beam.
-    int loc = Sphinx[(int)player];
-    int dirIndex = GetOrientation(board.Get(loc));
-    int dir, p;
-    Square dest = Empty;
-    while (dest != OffBoard && dirIndex >= 0)
-    {
-        dir = Directions[dirIndex];
-
-        // Take a step with the laser beam.
-        loc += dir;
-
-        // Is this location occupied?
-        dest = board.Get(loc);
-        if (IsPiece(dest))
-        {
-            p = (int)GetPiece(dest);
-            dirIndex = Reflections[dirIndex][p - 2][GetOrientation(dest)];
-        }
-        else
-        {
-            ++squares;
-        }
-
-        bonus += _params.LaserPharaohVal(Distance(enemyPharaoh, loc));
-    }
-
-    return _params.LaserVal() * squares + bonus;
+    _laser.Fire(player, board);
+    return _params.LaserVal() * _laser.PathLength();
 }
