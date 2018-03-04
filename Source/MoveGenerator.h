@@ -4,7 +4,7 @@
 #include "Board.h"
 #include "Globals.h"
 #include "History.h"
-#include "Laser.h"
+#include "PathLaser.h"
 #include "Types.h"
 
 // Generate all of the moves for the specified position in order of urgency.
@@ -36,7 +36,7 @@ private:
     int _stage = Priority;
     int _stoppedStage;
     Player _playerToMove;
-    Laser _laser;
+    PathLaser _laser;
 
     // Maintain a buffer for each stage.
     std::vector<Move> _moveBuffers[Done];
