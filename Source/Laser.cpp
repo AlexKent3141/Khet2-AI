@@ -4,16 +4,12 @@
 
 bool Laser::Fire(const Player& player, const ILaserable& board)
 {
-    _pathLength = 0;
-
     // Find the starting location and direction for the laserbeam.
     _targetIndex = Sphinx[(int)player];
     _targetSquare = Empty;
     int dirIndex = GetOrientation(board.Get(_targetIndex));
     while (_targetSquare != OffBoard && dirIndex >= 0)
     {
-        ++_pathLength;
-
         // Take a step with the laserbeam.
         _targetIndex += Directions[dirIndex];
 

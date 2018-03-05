@@ -2,7 +2,7 @@
 #include "Globals.h"
 #include "SquareHelpers.h"
 
-Laser Evaluator::_laser = Laser();
+EvalLaser Evaluator::_laser = EvalLaser();
 
 Evaluator::Evaluator()
 {
@@ -72,6 +72,15 @@ int Evaluator::LaserableScore(const Board& board) const
 
 int Evaluator::LaserableScore(Player player, const Board& board) const
 {
+    int bonus = 0;
+    Player other = player == Player::Silver ? Player::Red : Player::Silver;
+    int enemyPharaoh = board.PharaohPosition(other);
+    auto stepCalc = [&] (int loc)
+    {
+        bonus += _params.LaserPharaohVal(Distance(enemyPharaoh, loc));
+    };
+
+    _laser.SetStepCallback(stepCalc);
     _laser.Fire(player, board);
-    return _params.LaserVal() * _laser.PathLength();
+    return _params.LaserVal() * _laser.PathLength() + bonus;
 }

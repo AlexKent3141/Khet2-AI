@@ -15,13 +15,11 @@ public:
     inline int TargetIndex() const { return _targetIndex; }
     inline Square TargetSquare() const { return _targetSquare; }
     inline int TargetPiece() const { return _targetPiece; }
-    inline int PathLength() const { return _pathLength; }
 
 private:
     int _targetIndex;
     Square _targetSquare;
     int _targetPiece;
-    int _pathLength;
 };
 
 #endif // __LASER_H__
