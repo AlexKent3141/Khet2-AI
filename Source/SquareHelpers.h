@@ -1,3 +1,6 @@
+#ifndef __SQUARE_HELPERS_H__
+#define __SQUARE_HELPERS_H__
+
 #include "Globals.h"
 
 // The format for a Square (in bits) is:
@@ -39,3 +42,4 @@ inline bool IsPiece(Square s)
     return s != Empty && s != OffBoard;
 }
 
+#endif // __SQUARE_HELPERS_H__

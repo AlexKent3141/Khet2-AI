@@ -3,6 +3,7 @@
 
 #include "Globals.h"
 #include "ILaserable.h"
+#include "SquareHelpers.h"
 
 class Laser
 {

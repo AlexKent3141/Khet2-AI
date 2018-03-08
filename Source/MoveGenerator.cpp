@@ -100,23 +100,33 @@ void MoveGenerator::AddMove(const Board& board, int start, int end, int rotation
 {
     // Is this move dynamic and not obviously losing?
     bool capturesOnly = _stoppedStage == Quiet;
-    int dirEnd = _laser.PathAt(end);
-    if (dirEnd >= 0)
+
+    if (_laser.PathAt(start) >= 0 || _laser.PathAt(end) >= 0)
     {
-        // Does this piece die?
+        // Fire the laser and check whether anything would die.
         Square sq = board.Get(start);
-        int p = (int)GetPiece(sq);
         if (rotation != 0)
             sq = Rotate(sq, rotation);
-        int o = (int)GetOrientation(sq);
 
-        if (Reflections[dirEnd][p - 2][o] == Dead)
+        int killLoc = _laser.FireWillKill(_playerToMove, board, start, end, sq, board.Get(end));
+        if (board.Get(killLoc) != OffBoard)
         {
-            if (!capturesOnly)
-                _moveBuffers[Suicide].push_back(MakeMove(start, end, rotation));
+            // Either capture or suicide.
+            if (killLoc == end || GetOwner(board.Get(killLoc)) == _playerToMove)
+            {
+                if (!capturesOnly)
+                    _moveBuffers[Suicide].push_back(MakeMove(start, end, rotation));
+            }
+            else
+            {
+                _moveBuffers[Dynamic].push_back(MakeMove(start, end, rotation));
+            }
         }
         else
-            _moveBuffers[Dynamic].push_back(MakeMove(start, end, rotation));
+        {
+            if (!capturesOnly)
+                _moveBuffers[Quiet].push_back(MakeMove(start, end, rotation));
+        }
     }
     else
     {

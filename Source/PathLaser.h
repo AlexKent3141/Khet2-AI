@@ -14,7 +14,44 @@ public:
         return Laser::Fire(player, board);
     }
 
-    void OnStep(int targetIndex, int postDir)
+    // This method calculates whether a piece will die when the laser is fired after the specified
+    // move has been made.
+    int FireWillKill(const Player& player, const ILaserable& board, int start, int end, Square finalSq, Square initialEndSq)
+    {
+       // Find the starting location and direction for the laserbeam.
+        int ti = Sphinx[(int)player];
+        int ts = Empty;
+        int dirIndex = GetOrientation(board.Get(ti));
+        while (ts != OffBoard && dirIndex >= 0)
+        {
+            // Take a step with the laserbeam.
+            ti += Directions[dirIndex];
+
+            // Is this location occupied?
+            if (ti == start && start != end)
+            {
+                ts = initialEndSq; // This way we support swaps.
+            }
+            else if (ti == end)
+            {
+                ts = finalSq;
+            }
+            else
+            {
+                ts = board.Get(ti);
+            }
+
+            if (IsPiece(ts))
+            {
+                int tp = (int)GetPiece(ts);
+                dirIndex = Reflections[dirIndex][tp - 2][GetOrientation(ts)];
+            }
+        }
+
+        return ti;
+    }
+
+	void OnStep(int targetIndex, int postDir)
     {
         _laserPath[targetIndex] = postDir;
     }

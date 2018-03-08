@@ -1,5 +1,4 @@
 #include "Laser.h"
-#include "SquareHelpers.h"
 #include <cstring>
 
 bool Laser::Fire(const Player& player, const ILaserable& board)
