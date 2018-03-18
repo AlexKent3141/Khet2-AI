@@ -37,10 +37,10 @@ private:
     bool CheckTime() const;
 
     // This root call to the Alpha-Beta search returns the best root move.
-    Move AlphaBetaRoot(TT&, const Evaluator&, Board&, int, int&);
+    Move AlphaBetaRoot(TT&, History&, const Evaluator&, Board&, int, int&);
 
     // Score the given position using NegaMax with Alpha-Beta pruning.
-    int AlphaBeta(TT&, const Evaluator&, Board&, int depth, int alpha, int beta, int sign);
+    int AlphaBeta(TT&, History&, const Evaluator&, Board&, int depth, int alpha, int beta, int sign);
 
     // Quiescence search extension.
     int Quiesce(const Evaluator&, Board&, int depth, int alpha, int beta, int sign);

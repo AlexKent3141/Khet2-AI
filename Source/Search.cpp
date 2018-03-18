@@ -19,12 +19,14 @@ Move Search::Start(TT& table, const SearchParams& params, Board& board, int& sco
     int tempScore;
     bool keepSearching = true;
 
+    History history;
+
     // Use the default evaluator.
     EvalParams evalParams;
     Evaluator eval(evalParams);
     for (int d = 1; keepSearching && d <= MaxDepth; d++)
     {
-        tempMove = AlphaBetaRoot(table, eval, board, d, tempScore);
+        tempMove = AlphaBetaRoot(table, history, eval, board, d, tempScore);
         keepSearching = CheckTime();
         if (keepSearching)
         {
@@ -99,7 +101,7 @@ bool Search::CheckTime() const
 }
 
 // Initial alpha-beta call which assesses the root nodes and returns the best move.
-Move Search::AlphaBetaRoot(TT& table, const Evaluator& eval, Board& board, int depth, int& score)
+Move Search::AlphaBetaRoot(TT& table, History& history, const Evaluator& eval, Board& board, int depth, int& score)
 {
     score = -eval.MaxScore();
     Move bestMove = NoMove;
@@ -116,7 +118,7 @@ Move Search::AlphaBetaRoot(TT& table, const Evaluator& eval, Board& board, int d
         while ((move = gen.Next()) != NoMove && CheckTime())
         {
             board.MakeMove(move);
-            val = -AlphaBeta(table, eval, board, depth-1, -eval.MaxScore(), eval.MaxScore(), -sign);
+            val = -AlphaBeta(table, history, eval, board, depth-1, -eval.MaxScore(), eval.MaxScore(), -sign);
 
             board.UndoMove();
 
@@ -136,7 +138,7 @@ Move Search::AlphaBetaRoot(TT& table, const Evaluator& eval, Board& board, int d
 }
 
 // Alpha-beta call which returns the value of the specified board state.
-int Search::AlphaBeta(TT& table, const Evaluator& eval, Board& board, int depth, int alpha, int beta, int sign)
+int Search::AlphaBeta(TT& table, History& history, const Evaluator& eval, Board& board, int depth, int alpha, int beta, int sign)
 {
     int score = -eval.MaxScore();
     if (depth == 0 || board.IsCheckmate() || board.IsDraw())
@@ -167,18 +169,25 @@ int Search::AlphaBeta(TT& table, const Evaluator& eval, Board& board, int depth,
         }
 
         MoveGenerator gen(board, hashMove);
+        gen.Sort(MoveGenerator::Stage::Quiet, history);
         Move move = NoMove;
         int val;
         bool inTime = false;
-        while ((move = gen.Next()) != NoMove && alpha < beta && (inTime = CheckTime()))
+        while ((move = gen.Next()) != NoMove && (inTime = CheckTime()))
         {
             board.MakeMove(move);
-            val = -AlphaBeta(table, eval, board, depth-1, -beta, -alpha, -sign);
+            val = -AlphaBeta(table, history, eval, board, depth-1, -beta, -alpha, -sign);
             board.UndoMove();
 
             // Update the bounds.
             score = std::max(score, val);;
             alpha = std::max(alpha, val);
+
+            if (alpha >= beta)
+            {
+                history.IncrementScore(board.PlayerToMove(), move, depth);
+                break;
+            }
         }
 
         // Insert the newly evaluated position.
