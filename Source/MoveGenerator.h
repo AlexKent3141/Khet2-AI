@@ -23,7 +23,7 @@ public:
 
     MoveGenerator() = delete;
     MoveGenerator(const Board&, int finalStage = Suicide);
-    MoveGenerator(const Board&, Move, int finalStage = Suicide);
+    MoveGenerator(const Board&, Move, Move, int finalStage = Suicide);
 
     // Sort the moves in the specified stage according to historical score.
     void Sort(Stage, const History&);

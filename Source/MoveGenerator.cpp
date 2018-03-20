@@ -13,10 +13,10 @@ MoveGenerator::MoveGenerator(const Board& board, int finalStage)
     }
 }
 
-MoveGenerator::MoveGenerator(const Board& board, Move priorityMove, int finalStage)
+MoveGenerator::MoveGenerator(const Board& board, Move hashMove, Move killerMove, int finalStage)
 {
-    if (priorityMove != NoMove)
-        _moveBuffers[Priority].push_back(priorityMove);
+    if (hashMove != NoMove) _moveBuffers[Priority].push_back(hashMove);
+    if (killerMove != NoMove) _moveBuffers[Priority].push_back(killerMove);
 
     _stoppedStage = finalStage + 1;
     if (!board.IsCheckmate() && !board.IsDraw())
@@ -85,14 +85,11 @@ void MoveGenerator::Generate(const Board& board)
 
 void MoveGenerator::Sort(Stage stage, const History& history)
 {
-    if (_moveBuffers[stage].size() > 0)
+    std::sort(_moveBuffers[stage].begin(), _moveBuffers[stage].end(),
+        [&] (const Move& m1, const Move& m2)
     {
-        std::sort(_moveBuffers[stage].begin(), _moveBuffers[stage].end(),
-            [&] (const Move& m1, const Move& m2)
-        {
-            return history.Score(_playerToMove, m1) > history.Score(_playerToMove, m2);
-        });
-    }
+        return history.Score(_playerToMove, m1) > history.Score(_playerToMove, m2);
+    });
 }
 
 // Add the specified move to one of the caches.
