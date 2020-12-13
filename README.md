@@ -17,7 +17,7 @@ For the purposes of this project I will make the following restrictions and exte
 These may be subject to further tweaks once the AI can be tested fully.
 
 ## Building
-The program is compiled using the GNU compiler and is built using the Unix *make* utility. At this point there is no build procedure for Windows.
+The program is compiled using CMake and has been tested on Windows (MSVC) and Linux (GCC).
 
 ## Usage
 This program is now in a working state and can be used to analyse Khet 2.0 positions and suggest moves. Communications with the engine follow a protocol similar to the UCI protocol for chess (see "protocol.txt" for a full specification).
