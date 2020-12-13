@@ -1,6 +1,7 @@
 #include "Evaluator.h"
 #include "Globals.h"
 #include "SquareHelpers.h"
+#include <algorithm>
 
 EvalLaser Evaluator::_laser = EvalLaser();
 

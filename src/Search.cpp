@@ -2,6 +2,7 @@
 #include "Evaluator.h"
 #include "MoveGenerator.h"
 #include "MoveHelpers.h"
+#include <algorithm>
 #include <iostream>
 #include <cassert>
 #include <climits>

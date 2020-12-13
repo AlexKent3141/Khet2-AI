@@ -1,6 +1,5 @@
 
 if (MSVC)
-# TODO
 else()
   add_compile_options(
     -Wall -Wpedantic -Werror -std=c++11 -O3)
@@ -18,7 +17,6 @@ add_executable(khet
   main.cpp)
 
 if (MSVC)
-# TODO
 else()
   target_link_libraries(khet
     pthread)
