@@ -8,8 +8,10 @@
 class Laser
 {
 public:
-    // Fire the laser for the current player on the specified laserable object and return a boolean
-    // indicating whether a piece gets captured.
+    virtual ~Laser() = default;
+
+    // Fire the laser for the current player on the specified laserable object
+    // and return a boolean indicating whether a piece gets captured.
     virtual bool Fire(const Player&, const ILaserable&);
     virtual void OnStep(int, int);
 

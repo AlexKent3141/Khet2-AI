@@ -2,18 +2,19 @@
 #define __TERMINATION_TEST_H__
 
 #include "TestBase.h"
-#include "../Board.h"
-#include "../EvalParams.h"
-#include "../Evaluator.h"
-#include "../Globals.h"
-#include "../MoveGenerator.h"
+#include "core/Board.h"
+#include "core/EvalParams.h"
+#include "core/Evaluator.h"
+#include "core/Globals.h"
+#include "core/MoveGenerator.h"
 #include <cassert>
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
 #include <string>
 
-// Termination tests test the ability to detected terminal positions i.e. checkmate and draws.
+// Termination tests test the ability to detected terminal positions i.e.
+// checkmate and draws.
 class TerminationTest : public TestBase
 {
 public:
@@ -22,12 +23,12 @@ public:
         srand(time(0));
     }
 
-    std::string TestFileName() const
+    std::string TestFileName() const override
     {
         return "TerminationTests.suite";
     }
 
-    bool Run(const std::vector<std::string>& testCase)
+    bool Run(const std::vector<std::string>& testCase) override
     {
         assert(testCase.size() == 2);
         std::string khetPos = testCase[0] + " " + testCase[1];

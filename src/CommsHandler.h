@@ -1,8 +1,8 @@
 #ifndef __COMMS_HANDLER_H__
 #define __COMMS_HANDLER_H__
 
-#include "Calculator.h"
-#include "TranspositionTable.h"
+#include "core/Calculator.h"
+#include "core/TranspositionTable.h"
 #include <string>
 
 // This class processes incoming messages.

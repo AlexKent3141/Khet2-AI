@@ -1,7 +1,7 @@
 #include "CommsHandler.h"
-#include "MoveHelpers.h"
-#include "Utils.h"
-#include "Types.h"
+#include "core/MoveHelpers.h"
+#include "core/Utils.h"
+#include "core/Types.h"
 #include <cassert>
 #include <iostream>
 

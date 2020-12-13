@@ -2,10 +2,10 @@
 #define __MOVE_GEN_TEST_H__
 
 #include "TestBase.h"
-#include "../Board.h"
-#include "../MoveGenerator.h"
-#include "../MoveHelpers.h"
-#include "../Types.h"
+#include "core/Board.h"
+#include "core/MoveGenerator.h"
+#include "core/MoveHelpers.h"
+#include "core/Types.h"
 #include <cassert>
 #include <iostream>
 #include <string>
@@ -13,14 +13,15 @@
 class MoveGenTest : public TestBase
 {
 public:
-    std::string TestFileName() const
+    std::string TestFileName() const override
     {
         return "MoveGenTests.suite";
     }
 
-    // For move generation tests the test case consists of a Khet position string (minus player)
-    // followed by the number of moves that the silver and red players have.
-    bool Run(const std::vector<std::string>& testCase)
+    // For move generation tests the test case consists of a Khet position
+    // string (minus player) followed by the number of moves that the silver
+    // and red players have.
+    bool Run(const std::vector<std::string>& testCase) override
     {
         assert(testCase.size() == 3);
         return RunForPlayer(testCase[0], Player::Silver, std::stoi(testCase[1])) &&

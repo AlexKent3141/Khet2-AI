@@ -9,7 +9,7 @@
 class EvalLaser : public Laser
 {
 public:
-    bool Fire(const Player& player, const ILaserable& board)
+    bool Fire(const Player& player, const ILaserable& board) override
     {
         _pathLength = 0;
         return Laser::Fire(player, board);
@@ -20,7 +20,7 @@ public:
         _callback = callback;
     }
 
-    void OnStep(int targetIndex, int postDir)
+    void OnStep(int targetIndex, int postDir) override
     {
         ++_pathLength;
         _callback(targetIndex);

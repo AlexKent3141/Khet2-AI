@@ -8,6 +8,8 @@
 class TestBase
 {
 public:
+    virtual ~TestBase() = default;
+
     virtual std::string TestFileName() const = 0;
 
     // Execute test based on the given tokens.

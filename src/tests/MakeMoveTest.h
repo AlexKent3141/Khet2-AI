@@ -2,8 +2,8 @@
 #define __MAKE_MOVE_TEST_H__
 
 #include "TestBase.h"
-#include "../Board.h"
-#include "../MoveGenerator.h"
+#include "core/Board.h"
+#include "core/MoveGenerator.h"
 #include <cassert>
 #include <iostream>
 #include <string>
@@ -11,12 +11,12 @@
 class MakeMoveTest : public TestBase
 {
 public:
-    std::string TestFileName() const
+    std::string TestFileName() const override
     {
         return "MakeMoveTests.suite";
     }
 
-    bool Run(const std::vector<std::string>& testCase)
+    bool Run(const std::vector<std::string>& testCase) override
     {
         assert(testCase.size() == 1);
         return RunForPlayer(testCase[0], Player::Silver) &&

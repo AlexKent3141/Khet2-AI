@@ -8,7 +8,7 @@
 class PathLaser : public Laser
 {
 public:
-    bool Fire(const Player& player, const ILaserable& board)
+    bool Fire(const Player& player, const ILaserable& board) override
     {
         memset(_laserPath, -1, BoardArea*sizeof(int));
         return Laser::Fire(player, board);
@@ -51,7 +51,7 @@ public:
         return ti;
     }
 
-	void OnStep(int targetIndex, int postDir)
+    void OnStep(int targetIndex, int postDir) override
     {
         _laserPath[targetIndex] = postDir;
     }

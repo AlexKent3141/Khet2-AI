@@ -1,7 +1,7 @@
 #ifndef __TEST_RUNNER_H__
 #define __TEST_RUNNER_H__
 
-#include "../Utils.h"
+#include "core/Utils.h"
 #include <cctype>
 #include <iostream>
 #include <fstream>
