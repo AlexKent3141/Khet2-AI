@@ -2,7 +2,7 @@
 if (MSVC)
 else()
   add_compile_options(
-    -Wall -Wpedantic -Werror -std=c++11 -O3)
+    -Wall -Wpedantic -Werror -std=c++14 -O3)
 endif()
 
 add_subdirectory(

@@ -7,20 +7,22 @@
 #include "Types.h"
 #include "SearchParams.h"
 #include "TranspositionTable.h"
+#include <atomic>
+#include <memory>
 #include <ctime>
 
 class Search
 {
 public:
     // Iterative deepening Minimax search.
-    Move Start(TT&, const SearchParams&, Board&, int&);
+    Move Start(TT&, std::unique_ptr<SearchParams>, Board&, int&);
 
     // Stop the current search.
     void Stop();
 
 private:
-    bool _stopped;
-    SearchParams _params;
+    std::atomic<bool> _stopped;
+    std::unique_ptr<SearchParams> _params;
     clock_t _startTime;
     History _history;
 

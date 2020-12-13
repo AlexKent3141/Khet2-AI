@@ -29,7 +29,7 @@ public:
             std::cout << line << std::endl;
             if (IsTestCase(line))
             {
-                pass = test.Run(utils->Split(line, ' '));
+                pass = test.Run(utils.Split(line, ' '));
                 std::cout << (pass ? "PASS" : "FAIL") << std::endl;
             }
         }

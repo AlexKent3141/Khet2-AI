@@ -8,26 +8,20 @@
 class Utils
 {
 public:
-	static Utils* GetInstance()
-	{
-		if (_instance == NULL)
-        {
-			_instance = new Utils();
-        }
-
-		return _instance;
-	}
+    static Utils& GetInstance()
+    {
+        static Utils instance;
+        return instance;
+    }
 
     // Split by character.
-	std::vector<std::string> Split(const std::string&, char) const;
+    std::vector<std::string> Split(const std::string&, char) const;
 
     // Split by characters.
-	std::vector<std::string> Split(const std::string&, const std::string& delims) const;
+    std::vector<std::string> Split(const std::string&, const std::string& delims) const;
 
 private:
-	static Utils* _instance;
-
-	Utils();
+    Utils() = default;
 };
 
 #endif // __UTILS_H__

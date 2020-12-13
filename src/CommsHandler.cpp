@@ -5,36 +5,27 @@
 #include <cassert>
 #include <iostream>
 
-CommsHandler::~CommsHandler()
-{
-    _table.Clear();
-    ClearBoard();
-}
-
 bool CommsHandler::Process(const std::string& message)
 {
     bool alive = true;
 
-    auto tokens = Utils::GetInstance()->Split(message, ' ');
+    auto tokens = Utils::GetInstance().Split(message, ' ');
     std::string messageType = tokens[0];
     if (messageType == "newgame")
     {
         _calculator.Stop();
         _table.Clear();
-        ClearBoard();
     }
     else if (messageType == "position")
     {
-        ClearBoard();
         _board = CreatePosition(tokens);
     }
     else if (messageType == "go")
     {
         assert(_board != nullptr);
-        SearchParams* params = CreateSearchParameters(tokens);
         _table.Age();
-        _calculator.Start(_table, *params, *_board);
-        delete params;
+        auto params = CreateSearchParameters(tokens);
+        _calculator.Start(_table, std::move(params), *_board);
     }
     else if (messageType == "stop")
     {
@@ -53,31 +44,23 @@ bool CommsHandler::Process(const std::string& message)
     return alive;
 }
 
-void CommsHandler::ClearBoard()
-{
-    if (_board != nullptr)
-    {
-        delete _board;
-        _board = nullptr;
-    }
-}
-
-Board* CommsHandler::CreatePosition(const std::vector<std::string>& tokens) const
+std::shared_ptr<Board> CommsHandler::CreatePosition(
+    const std::vector<std::string>& tokens) const
 {
     assert(tokens.size() > 1);
-    Board* board = nullptr;
+    std::shared_ptr<Board> board;
     size_t movesIndex = 2;
     if (tokens[1] == "standard")
-        board = new Board(Standard);
+        board = std::make_shared<Board>(Standard);
     else if (tokens[1] == "dynasty")
-        board = new Board(Dynasty);
+        board = std::make_shared<Board>(Dynasty);
     else if (tokens[1] == "imhotep")
-        board = new Board(Imhotep);
+        board = std::make_shared<Board>(Imhotep);
     else
     {
         // It's a Khet string.
         std::string ks = tokens[1] + " " + tokens[2];
-        board = new Board(ks);
+        board = std::make_shared<Board>(ks);
         movesIndex = 3;
     }
 
@@ -92,10 +75,11 @@ Board* CommsHandler::CreatePosition(const std::vector<std::string>& tokens) cons
     return board;
 }
 
-SearchParams* CommsHandler::CreateSearchParameters(const std::vector<std::string>& tokens) const
+std::unique_ptr<SearchParams> CommsHandler::CreateSearchParameters(
+    const std::vector<std::string>& tokens) const
 {
     assert(tokens.size() > 1);
-    SearchParams* params = new SearchParams();
+    auto params = std::make_unique<SearchParams>();
     std::string paramType = tokens[1];
     if (paramType == "infinite")
     {

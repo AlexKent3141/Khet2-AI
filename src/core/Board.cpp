@@ -81,7 +81,7 @@ void Board::MakeMove(Move move)
     int rotation = GetRotation(move);
 
     Square movingPiece = _board[start];
-    hash ^= z->Key(movingPiece, start);
+    hash ^= z.Key(movingPiece, start);
 
     if (rotation != 0)
     {
@@ -90,7 +90,7 @@ void Board::MakeMove(Move move)
 
     _board[start] = _board[end];
     _board[end] = movingPiece;
-    hash ^= z->Key(movingPiece, end);
+    hash ^= z.Key(movingPiece, end);
 
     // Update pharaoh positions.
     if (GetPiece(movingPiece) == Piece::Pharaoh)
@@ -106,7 +106,7 @@ void Board::MakeMove(Move move)
         _captureLocation[_moveNumber] = _laser.TargetIndex();
         _board[_laser.TargetIndex()] = Empty;
         _checkmate |= _laser.TargetPiece() == (int)Piece::Pharaoh;
-        hash ^= Zobrist::Instance()->Key(_laser.TargetSquare(), _laser.TargetIndex());
+        hash ^= z.Key(_laser.TargetSquare(), _laser.TargetIndex());
     }
     else
     {
@@ -115,7 +115,7 @@ void Board::MakeMove(Move move)
     }
 
     _playerToMove = _playerToMove == Player::Silver ? Player::Red : Player::Silver;
-    hash ^= z->Silver();
+    hash ^= z.Silver();
 
     _moves[_moveNumber] = move;
     _hashes[_moveNumber] = hash;
@@ -232,11 +232,11 @@ void Board::FromString(const std::string& ks)
     memset(_board, OffBoard, BoardArea*sizeof(Square));
 
     auto utils = Utils::GetInstance();
-    auto tokens = utils->Split(ks, ' ');
+    auto tokens = utils.Split(ks, ' ');
     _playerToMove = tokens[1] == "0" ? Player::Silver : Player::Red;
-    _hashes[0] ^= _playerToMove == Player::Silver ? Zobrist::Instance()->Silver() : 0;
+    _hashes[0] ^= _playerToMove == Player::Silver ? Zobrist::Instance().Silver() : 0;
 
-    tokens = utils->Split(tokens[0], '/');
+    tokens = utils.Split(tokens[0], '/');
     for (size_t i = 0; i < tokens.size(); i++)
     {
         ParseLine(i, tokens[i]);
@@ -274,7 +274,7 @@ void Board::ParseLine(int index, const std::string& line)
             }
 
             Square sq = MakeSquare(player, piece, orientation);
-            hash ^= z->Key(sq, boardIndex);
+            hash ^= z.Key(sq, boardIndex);
             _board[boardIndex++] = sq;
         }
         else

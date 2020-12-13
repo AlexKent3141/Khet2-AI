@@ -23,7 +23,7 @@ bool Laser::Fire(const Player& player, const ILaserable& board)
         OnStep(_targetIndex, dirIndex);
     }
 
-	return dirIndex == Dead;
+    return dirIndex == Dead;
 }
 
 void Laser::OnStep(int targetIndex, int postDir)

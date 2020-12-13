@@ -1,12 +1,6 @@
 #include "Utils.h"
 #include <sstream>
 
-Utils* Utils::_instance = NULL;
-
-Utils::Utils()
-{
-}
-
 // Split by character.
 std::vector<std::string> Utils::Split(const std::string& s, char delim) const
 {
@@ -14,7 +8,7 @@ std::vector<std::string> Utils::Split(const std::string& s, char delim) const
     std::stringstream ss(s);
     std::string item;
     while (std::getline(ss, item, delim)) 
-	{
+    {
         elems.push_back(item);
     }
     return elems;
@@ -27,7 +21,7 @@ std::vector<std::string> Utils::Split(const std::string& s, const std::string& d
 
     size_t prev = 0, pos;
     while ((pos = s.find_first_of(delims, prev)) != std::string::npos)
-	{
+    {
         if (pos > prev)
             elems.push_back(s.substr(prev, pos-prev));
         prev = pos + 1;

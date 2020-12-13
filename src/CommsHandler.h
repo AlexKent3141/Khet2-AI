@@ -3,13 +3,13 @@
 
 #include "core/Calculator.h"
 #include "core/TranspositionTable.h"
+#include <memory>
 #include <string>
 
 // This class processes incoming messages.
 class CommsHandler
 {
 public:
-    ~CommsHandler();
     bool Process(const std::string&);
 
 private:
@@ -25,11 +25,13 @@ private:
 
     Calculator _calculator;
     TT _table;
-    Board* _board = nullptr;
+    std::shared_ptr<Board> _board;
 
-    void ClearBoard();
-    Board* CreatePosition(const std::vector<std::string>&) const;
-    SearchParams* CreateSearchParameters(const std::vector<std::string>&) const;
+    std::shared_ptr<Board> CreatePosition(
+        const std::vector<std::string>&) const;
+
+    std::unique_ptr<SearchParams> CreateSearchParameters(
+        const std::vector<std::string>&) const;
 };
 
 #endif // __COMMS_HANDLER_H__

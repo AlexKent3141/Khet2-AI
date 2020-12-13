@@ -8,13 +8,17 @@
 #include <climits>
 
 // Iterative deepening framework.
-Move Search::Start(TT& table, const SearchParams& params, Board& board, int& score)
+Move Search::Start(
+    TT& table,
+    std::unique_ptr<SearchParams> params,
+    Board& board,
+    int& score)
 {
     const int MaxDepth = 100;
     Move killers[MaxDepth] = { NoMove };
 
     _stopped = false;
-    _params = params;
+    _params = std::move(params);
     _startTime = clock();
 
     Move bestMove = NoMove, tempMove = NoMove;
@@ -47,7 +51,7 @@ Move Search::Start(TT& table, const SearchParams& params, Board& board, int& sco
                 ScoreInfo(d, score);
             }
 
-            if (_params.Depth() > 0 && d >= _params.Depth())
+            if (_params->Depth() > 0 && d >= _params->Depth())
             {
                 keepSearching = false;
             }
@@ -94,9 +98,9 @@ clock_t Search::TimeElapsed() const
 bool Search::CheckTime() const
 {
     bool hasTime = true;
-    if (!_params.Infinite() && _params.Depth() <= 0)
+    if (!_params->Infinite() && _params->Depth() <= 0)
     {
-        hasTime = TimeElapsed() < _params.MoveTime();
+        hasTime = TimeElapsed() < _params->MoveTime();
     }
     
     return hasTime && !_stopped;

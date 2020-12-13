@@ -10,14 +10,10 @@
 class Zobrist
 {
 public:
-    static Zobrist* Instance() 
+    static Zobrist& Instance()
     {
-        if (_instance == nullptr)
-        {
-            _instance = new Zobrist();
-        }
-
-        return _instance;
+        static Zobrist zob;
+        return zob;
     }
 
     inline uint64_t Silver() const { return _silver; }
@@ -47,7 +43,5 @@ private:
         }
     }
 };
-
-Zobrist* Zobrist::_instance = nullptr;
 
 #endif // __ZOBRIST_H__
