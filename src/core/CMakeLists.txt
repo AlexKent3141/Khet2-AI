@@ -1,6 +1,6 @@
 
 add_library(khet_core
-  SHARED
+  STATIC
     Board.cpp
     Calculator.cpp
     Evaluator.cpp
