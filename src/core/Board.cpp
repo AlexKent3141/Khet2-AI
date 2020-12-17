@@ -73,7 +73,6 @@ void Board::MakeMove(Move move)
     assert(!_drawn && !_checkmate);
     assert(IsLegal(move));
 
-    auto z = Zobrist::Instance();
     uint64_t hash = _hashes[_moveNumber++];
 
     int start = GetStart(move);
@@ -81,7 +80,7 @@ void Board::MakeMove(Move move)
     int rotation = GetRotation(move);
 
     Square movingPiece = _board[start];
-    hash ^= z.Key(movingPiece, start);
+    hash ^= Zobrist::Key(movingPiece, start);
 
     if (rotation != 0)
     {
@@ -90,7 +89,7 @@ void Board::MakeMove(Move move)
 
     _board[start] = _board[end];
     _board[end] = movingPiece;
-    hash ^= z.Key(movingPiece, end);
+    hash ^= Zobrist::Key(movingPiece, end);
 
     // Update pharaoh positions.
     if (GetPiece(movingPiece) == Piece::Pharaoh)
@@ -106,7 +105,7 @@ void Board::MakeMove(Move move)
         _captureLocation[_moveNumber] = _laser.TargetIndex();
         _board[_laser.TargetIndex()] = Empty;
         _checkmate |= _laser.TargetPiece() == (int)Piece::Pharaoh;
-        hash ^= z.Key(_laser.TargetSquare(), _laser.TargetIndex());
+        hash ^= Zobrist::Key(_laser.TargetSquare(), _laser.TargetIndex());
     }
     else
     {
@@ -115,7 +114,7 @@ void Board::MakeMove(Move move)
     }
 
     _playerToMove = _playerToMove == Player::Silver ? Player::Red : Player::Silver;
-    hash ^= z.Silver();
+    hash ^= Zobrist::Silver();
 
     _moves[_moveNumber] = move;
     _hashes[_moveNumber] = hash;
@@ -231,12 +230,11 @@ void Board::FromString(const std::string& ks)
 {
     memset(_board, OffBoard, BoardArea*sizeof(Square));
 
-    auto utils = Utils::GetInstance();
-    auto tokens = utils.Split(ks, ' ');
+    auto tokens = Utils::Split(ks, ' ');
     _playerToMove = tokens[1] == "0" ? Player::Silver : Player::Red;
-    _hashes[0] ^= _playerToMove == Player::Silver ? Zobrist::Instance().Silver() : 0;
+    _hashes[0] ^= _playerToMove == Player::Silver ? Zobrist::Silver() : 0;
 
-    tokens = utils.Split(tokens[0], '/');
+    tokens = Utils::Split(tokens[0], '/');
     for (size_t i = 0; i < tokens.size(); i++)
     {
         ParseLine(i, tokens[i]);
@@ -252,7 +250,6 @@ void Board::ParseLine(int index, const std::string& line)
     // Fill the line with empty initially.
     memset(&_board[boardIndex], Empty, (BoardWidth - 2)*sizeof(Square));
 
-    auto z = Zobrist::Instance();
     uint64_t hash = 0;
     for (size_t i = 0; i < line.size(); i++)
     {
@@ -274,7 +271,7 @@ void Board::ParseLine(int index, const std::string& line)
             }
 
             Square sq = MakeSquare(player, piece, orientation);
-            hash ^= z.Key(sq, boardIndex);
+            hash ^= Zobrist::Key(sq, boardIndex);
             _board[boardIndex++] = sq;
         }
         else

@@ -9,7 +9,7 @@ bool CommsHandler::Process(const std::string& message)
 {
     bool alive = true;
 
-    auto tokens = Utils::GetInstance().Split(message, ' ');
+    auto tokens = Utils::Split(message, ' ');
     std::string messageType = tokens[0];
     if (messageType == "newgame")
     {

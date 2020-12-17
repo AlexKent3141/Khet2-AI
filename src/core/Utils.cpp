@@ -2,7 +2,9 @@
 #include <sstream>
 
 // Split by character.
-std::vector<std::string> Utils::Split(const std::string& s, char delim) const
+std::vector<std::string> Utils::Split(
+    const std::string& s,
+    char delim)
 {
     auto elems = std::vector<std::string>();
     std::stringstream ss(s);
@@ -15,7 +17,9 @@ std::vector<std::string> Utils::Split(const std::string& s, char delim) const
 }
 
 // Split by characters.
-std::vector<std::string> Utils::Split(const std::string& s, const std::string& delims) const
+std::vector<std::string> Utils::Split(
+    const std::string& s,
+    const std::string& delims)
 {
     auto elems = std::vector<std::string>();
 

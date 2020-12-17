@@ -3,6 +3,7 @@
 #include "core/EvalParams.h"
 #include "core/Evaluator.h"
 #include "core/MoveGenerator.h"
+#include "core/Zobrist.h"
 #include <cassert>
 #include <cstdlib>
 #include <ctime>
@@ -35,6 +36,10 @@ void RunTerminationTest(const std::string& khetPos, Player player)
 {
     // Use fixed seed.
     srand(0xC2E1E8AE);
+
+    // Ensure that Zobrist hashes are initialised so that repetition is
+    // detected correctly.
+    Zobrist::Initialise();
 
     std::string khetPosFull = khetPos + " " + std::to_string(int(player));
 

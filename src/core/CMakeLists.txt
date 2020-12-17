@@ -7,7 +7,8 @@ add_library(khet_core
     Laser.cpp
     MoveGenerator.cpp
     Search.cpp
-    Utils.cpp)
+    Utils.cpp
+    Zobrist.cpp)
 
 if (MSVC)
 else()
