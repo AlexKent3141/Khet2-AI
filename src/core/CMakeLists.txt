@@ -1,6 +1,7 @@
 
 add_library(khet_core
   STATIC
+    Bitboard.cpp
     Board.cpp
     Calculator.cpp
     Evaluator.cpp
