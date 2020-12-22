@@ -6,7 +6,6 @@
 #include <cassert>
 #include <cctype>
 #include <cstring>
-#include <iostream>
 
 Board::Board(const Board& other)
 {
@@ -157,7 +156,7 @@ void Board::MakeMove(Move move)
         _board[_laser.TargetIndex()] = Empty;
 
         RemovePieceFromBB(
-            p,
+            GetOwner(_laser.TargetSquare()),
             GetPiece(_laser.TargetSquare()),
             _laser.TargetIndex());
 

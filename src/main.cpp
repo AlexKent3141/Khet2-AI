@@ -6,6 +6,7 @@
 int main(int argc, char* argv[])
 {
     Zobrist::Initialise();
+    Bitboards::Initialise();
 
     CommsHandler handler;
     std::string message;

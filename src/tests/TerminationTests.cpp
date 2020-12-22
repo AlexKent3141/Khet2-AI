@@ -58,7 +58,6 @@ void RunTerminationTest(const std::string& khetPos, Player player)
             if ((move = GetRandomMove(board)) != NoMove)
             {
                 // Make the move.
-                std::cout << "Move: " << ToString(move) << std::endl;
                 board.MakeMove(move);
             }
             else

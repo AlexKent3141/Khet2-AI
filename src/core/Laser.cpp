@@ -5,6 +5,8 @@ bool Laser::Fire(const Player& player, const ILaserable& board)
 {
     const BB allPieces = board.GetPieces();
 
+    _laserPath.Reset();
+
     // Find the starting location and direction for the laserbeam.
     _targetIndex = Sphinx[(int)player];
     _targetSquare = Empty;
@@ -34,5 +36,5 @@ bool Laser::Fire(const Player& player, const ILaserable& board)
         dirIndex = Reflections[dirIndex][_targetPiece - 2][GetOrientation(_targetSquare)];
     }
 
-    return true;
+    return dirIndex == Dead;
 }

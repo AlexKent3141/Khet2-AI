@@ -18,7 +18,7 @@ public:
 
     operator bool() const { return lower_ || upper_; }
 
-    BB& operator~();
+    BB operator~();
     BB& operator&=(const BB& other);
     BB& operator|=(const BB& other);
     BB& operator^=(const BB& other);
@@ -26,6 +26,7 @@ public:
     void Set(int i);
     void Unset(int i);
     bool Test(int i) const;
+    void Reset();
 
     int LSB() const;
     int MSB() const;

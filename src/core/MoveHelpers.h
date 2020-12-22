@@ -8,12 +8,12 @@
 inline std::string LocationToString(int loc)
 {
     const std::string Files = "abcdefghij";
-    return Files[loc % BoardWidth] + std::to_string(loc / BoardWidth);
+    return Files[loc % BoardWidth] + std::to_string((loc / BoardWidth) + 1);
 }
 
 inline int StringToLocation(char file, char rank)
 {
-    return (rank - 48)*BoardWidth + (file - 96);
+    return (rank - '1')*BoardWidth + (file - 'a');
 }
 
 // The format for a Move (in bits) is:

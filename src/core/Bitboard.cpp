@@ -34,11 +34,12 @@ BB& BB::operator==(const BB& other)
     return *this;
 }
 
-BB& BB::operator~()
+BB BB::operator~()
 {
-    lower_ = (~lower_ & First40Bits);
-    upper_ = (~upper_ & First40Bits);
-    return *this;
+    BB inverted;
+    inverted.lower_ = (~lower_ & First40Bits);
+    inverted.upper_ = (~upper_ & First40Bits);
+    return inverted;
 }
 
 BB& BB::operator&=(const BB& other)
@@ -80,10 +81,14 @@ void BB::Unset(int i)
         upper_ &= ~(One << (i - HalfBoard));
 }
 
+void BB::Reset()
+{
+    lower_ = 0;
+    upper_ = 0;
+}
+
 bool BB::Test(int i) const
 {
-    if (i >= WholeBoard)
-        std::cout << "Fish: " << i << std::endl;
     assert(i < WholeBoard);
     if (i < HalfBoard)
         return lower_ & (One << i);
