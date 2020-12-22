@@ -1,10 +1,12 @@
 #ifndef __BOARD_H__
 #define __BOARD_H__
 
+#include "Bitboard.h"
 #include "Globals.h"
 #include "ILaserable.h"
 #include "Laser.h"
 #include "Types.h"
+#include <array>
 #include <string>
 
 // Represents the Khet board state.
@@ -20,8 +22,19 @@ public:
     bool IsLegal(Move) const;
 
     // Accessors.
+    inline Square Get(int i) const override { return _board[i]; }
+
+    inline BB GetPieces(Player p, Piece pt) const
+    {
+        return _pieces[int(p)][int(pt)];
+    }
+
+    inline BB GetPieces() const override
+    {
+        return _playerPieces[0] | _playerPieces[1];
+    }
+
     inline Player PlayerToMove() const { return _playerToMove; }
-    inline Square Get(int i) const { return _board[i]; }
     inline bool IsCheckmate() const { return _checkmate; }
     inline bool IsDraw() const { return _drawn; }
     inline Square LastCapture() const { return _captureSquare[_moveNumber]; }
@@ -41,8 +54,14 @@ private:
     uint64_t _hashes[MaxGameLength];
     Laser _laser;
 
-    // Mailbox style storage is used with one layer of padding.
+    // Mailbox style storage.
     Square _board[BoardArea];
+
+    // All pieces for each player.
+    std::array<BB, 2> _playerPieces;
+
+    // Bitboards for each piece type for each player.
+    std::array<std::array<BB, 7>, 2> _pieces;
 
     // Move list.
     Move _moves[MaxGameLength] = { NoMove };
@@ -62,6 +81,9 @@ private:
     void CheckForDraw();
 
     void FromString(const std::string&);
+
+    void RemovePieceFromBB(Player, Piece, int);
+    void AddPieceToBB(Player, Piece, int);
 
     // Serialisation.
     void ParseLine(int, const std::string&);

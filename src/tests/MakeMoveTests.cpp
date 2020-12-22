@@ -1,11 +1,16 @@
 #include "catch2/catch.hpp"
 #include "core/Board.h"
 #include "core/MoveGenerator.h"
+#include "core/Bitboard.h"
+#include "core/Zobrist.h"
 #include <string>
 
 // Make and undo every move and check that the move was reverted correctly.
 void MakeUnmake(Board board)
 {
+    Zobrist::Initialise();
+    Bitboards::Initialise();
+
     MoveGenerator gen(board);
     int cmp = 0;
     Move move = NoMove;

@@ -1,9 +1,8 @@
 #include "Evaluator.h"
 #include "Globals.h"
+#include "Laser.h"
 #include "SquareHelpers.h"
 #include <algorithm>
-
-EvalLaser Evaluator::_laser = EvalLaser();
 
 Evaluator::Evaluator()
 {
@@ -52,7 +51,7 @@ int Evaluator::MaterialScore(const Board& board) const
     for (size_t i = 0; i < BoardArea; i++)
     {
         sq = board.Get(i);
-        if (sq != OffBoard && sq != Empty)
+        if (sq != Empty)
         {
             player = GetOwner(sq);
             piece = GetPiece(sq);
@@ -76,12 +75,18 @@ int Evaluator::LaserableScore(Player player, const Board& board) const
     int bonus = 0;
     Player other = player == Player::Silver ? Player::Red : Player::Silver;
     int enemyPharaoh = board.PharaohPosition(other);
-    auto stepCalc = [&] (int loc)
-    {
-        bonus += _params.LaserPharaohVal(Distance(enemyPharaoh, loc));
-    };
 
-    _laser.SetStepCallback(stepCalc);
-    _laser.Fire(player, board);
-    return _params.LaserVal() * _laser.PathLength() + bonus;
+    Laser laser;
+    laser.Fire(player, board);
+
+    BB path = laser.LaserPath();
+    int loc, pathLength = 0;
+    while (path)
+    {
+        loc = path.PopLSB();
+        bonus += _params.LaserPharaohVal(Distance(enemyPharaoh, loc));
+        ++pathLength;
+    }
+
+    return _params.LaserVal() * pathLength  + bonus;
 }

@@ -12,9 +12,15 @@ Board::Board(const Board& other)
 {
     Init();
     _playerToMove = other._playerToMove;
+
+    // TODO: Revisit this method of copying - it would be good to use something
+    // a bit safer.
     memcpy(_hashes, other._hashes, MaxGameLength*sizeof(uint64_t));
     memcpy(_board, other._board, BoardArea*sizeof(Square));
     memcpy(_pharaohPositions, other._pharaohPositions, 2*sizeof(int));
+
+    _playerPieces = other._playerPieces;
+    _pieces = other._pieces;
 }
 
 Board::Board(const std::string& ks)
@@ -37,8 +43,17 @@ int Board::Compare(const Board& other)
 
     if (ret > BoardArea)
     {
-        ret = _playerToMove == other._playerToMove && 
+        ret = _playerToMove != other._playerToMove ||
             _hashes[_moveNumber] != other._hashes[_moveNumber] ?  -1 : 0;
+    }
+
+    // Additionally check the bit boards.
+    if (ret == 0)
+    {
+        if (_playerPieces != other._playerPieces)
+            ret = -2;
+        else if (_pieces != other._pieces)
+            ret = -3;
     }
 
     return ret;
@@ -67,11 +82,31 @@ bool Board::IsLegal(Move move) const
     return startOccupancy && endOccupancy;
 }
 
+void Board::RemovePieceFromBB(
+    Player player,
+    Piece piece,
+    int loc)
+{
+    _playerPieces[int(player)].Unset(loc);
+    _pieces[int(player)][int(piece)].Unset(loc);
+}
+
+void Board::AddPieceToBB(
+    Player player,
+    Piece piece,
+    int loc)
+{
+    _playerPieces[int(player)].Set(loc);
+    _pieces[int(player)][int(piece)].Set(loc);
+}
+
 void Board::MakeMove(Move move)
 {
     assert(move != NoMove);
     assert(!_drawn && !_checkmate);
     assert(IsLegal(move));
+
+    Player p = _playerToMove;
 
     uint64_t hash = _hashes[_moveNumber++];
 
@@ -80,6 +115,7 @@ void Board::MakeMove(Move move)
     int rotation = GetRotation(move);
 
     Square movingPiece = _board[start];
+    Square swapPiece = _board[end];
     hash ^= Zobrist::Key(movingPiece, start);
 
     if (rotation != 0)
@@ -90,6 +126,21 @@ void Board::MakeMove(Move move)
     _board[start] = _board[end];
     _board[end] = movingPiece;
     hash ^= Zobrist::Key(movingPiece, end);
+
+    // Update the bitboards.
+    Piece mp = GetPiece(movingPiece);
+    RemovePieceFromBB(p, mp, start);
+
+    // If the move was a swap then need to also update the BB's for that piece.
+    if (swapPiece != Empty)
+    {
+        Piece sp = GetPiece(swapPiece);
+        Player owner = GetOwner(swapPiece);
+        RemovePieceFromBB(owner, sp, end);
+        AddPieceToBB(owner, sp, start);
+    }
+
+    AddPieceToBB(p, mp, end);
 
     // Update pharaoh positions.
     if (GetPiece(movingPiece) == Piece::Pharaoh)
@@ -104,16 +155,23 @@ void Board::MakeMove(Move move)
         _captureSquare[_moveNumber] = _laser.TargetSquare();
         _captureLocation[_moveNumber] = _laser.TargetIndex();
         _board[_laser.TargetIndex()] = Empty;
+
+        RemovePieceFromBB(
+            p,
+            GetPiece(_laser.TargetSquare()),
+            _laser.TargetIndex());
+
         _checkmate |= _laser.TargetPiece() == (int)Piece::Pharaoh;
         hash ^= Zobrist::Key(_laser.TargetSquare(), _laser.TargetIndex());
     }
     else
     {
-        _movesWithoutCapture[_moveNumber] = _movesWithoutCapture[_moveNumber - 1] + 1;
+        _movesWithoutCapture[_moveNumber] =
+            _movesWithoutCapture[_moveNumber - 1] + 1;
         _captureSquare[_moveNumber] = Empty;
     }
 
-    _playerToMove = _playerToMove == Player::Silver ? Player::Red : Player::Silver;
+    _playerToMove = p == Player::Silver ? Player::Red : Player::Silver;
     hash ^= Zobrist::Silver();
 
     _moves[_moveNumber] = move;
@@ -135,6 +193,7 @@ void Board::UndoMove()
     if (cap != Empty)
     {
         _board[capLoc] = cap;
+        AddPieceToBB(GetOwner(cap), GetPiece(cap), capLoc);
     }
 
     int start = GetStart(move);
@@ -142,6 +201,7 @@ void Board::UndoMove()
     int rotation = GetRotation(move);
 
     Square movedPiece = _board[end];
+    Square swapPiece = _board[start];
 
     if (rotation != 0)
     {
@@ -152,9 +212,26 @@ void Board::UndoMove()
     _board[end] = _board[start];
     _board[start] = movedPiece;
 
+    _playerToMove = _playerToMove == Player::Silver ? Player::Red : Player::Silver;
+    Player p = _playerToMove;
+
+    // Update the bitboards.
+    Piece mp = GetPiece(movedPiece);
+    RemovePieceFromBB(p, mp, end);
+
+    // If the move was a swap then need to also update the BB's for that piece.
+    if (swapPiece != Empty)
+    {
+        Piece sp = GetPiece(swapPiece);
+        Player owner = GetOwner(swapPiece);
+        RemovePieceFromBB(owner, sp, start);
+        AddPieceToBB(owner, sp, end);
+    }
+
+    AddPieceToBB(p, mp, start);
+
     _checkmate = false;
     _drawn = false;
-    _playerToMove = _playerToMove == Player::Silver ? Player::Red : Player::Silver;
 
     // Update pharaoh positions.
     if (GetPiece(movedPiece) == Piece::Pharaoh)
@@ -200,12 +277,7 @@ std::string Board::ToString() const
                 orientations += "\n";
             }
 
-            if (_board[i] == OffBoard)
-            {
-                pieces += "*";
-                orientations += "*";
-            }
-            else if (_board[i] == Empty)
+            if (_board[i] == Empty)
             {
                 pieces += ".";
                 orientations += ".";
@@ -228,7 +300,7 @@ std::string Board::ToString() const
 // Initialise the board from the specified Khet string.
 void Board::FromString(const std::string& ks)
 {
-    memset(_board, OffBoard, BoardArea*sizeof(Square));
+    memset(_board, Empty, BoardArea*sizeof(Square));
 
     auto tokens = Utils::Split(ks, ' ');
     _playerToMove = tokens[1] == "0" ? Player::Silver : Player::Red;
@@ -245,10 +317,10 @@ void Board::ParseLine(int index, const std::string& line)
 {
     // The zero-th index is the back rank.
     // Also need to take into account padding.
-    int boardIndex = BoardWidth * (BoardHeight - index - 2) + 1;
+    int boardIndex = BoardWidth * (BoardHeight - index - 1);
 
     // Fill the line with empty initially.
-    memset(&_board[boardIndex], Empty, (BoardWidth - 2)*sizeof(Square));
+    memset(&_board[boardIndex], Empty, BoardWidth*sizeof(Square));
 
     uint64_t hash = 0;
     for (size_t i = 0; i < line.size(); i++)
@@ -258,6 +330,8 @@ void Board::ParseLine(int index, const std::string& line)
             // Specifying a piece.
             Player player = isupper(line[i]) ? Player::Silver : Player::Red;
             Piece piece = PieceFromChar(line[i]);
+
+            AddPieceToBB(player, piece, boardIndex);
 
             Orientation orientation;
             if (piece == Piece::Pharaoh)

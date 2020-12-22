@@ -1,4 +1,5 @@
 #include "MoveGenerator.h"
+#include "Bitboard.h"
 #include "MoveHelpers.h"
 #include "SquareHelpers.h"
 #include <algorithm>
@@ -50,36 +51,40 @@ void MoveGenerator::Generate(const Board& board)
     _playerToMove = board.PlayerToMove();
     _passiveCapture = _laser.Fire(_playerToMove, board);
 
-    // Iterate over the pieces.
-    Piece piece;
-    for (int i = 0; i < BoardArea; i++)
+    int loc;
+    BB pieces = board.GetPieces(_playerToMove, Piece::Anubis);
+    while (pieces)
     {
-        Square s = board.Get(i);
-        if (IsPiece(s) && GetOwner(s) == _playerToMove)
-        {
-            piece = GetPiece(s);
+        loc = pieces.PopLSB();
+        GenerateAnubisMoves(board, loc);
+    }
 
-            switch (piece)
-            {
-            case Piece::Anubis:
-                GenerateAnubisMoves(board, i);
-                break;
-            case Piece::Pyramid:
-                GeneratePyramidMoves(board, i);
-                break;
-            case Piece::Scarab:
-                GenerateScarabMoves(board, i);
-                break;
-            case Piece::Pharaoh:
-                GeneratePharaohMoves(board, i);
-                break;
-            case Piece::Sphinx:
-                GenerateSphinxMoves(board, i);
-                break;
-            default:
-                break;
-            }
-        }
+    pieces = board.GetPieces(_playerToMove, Piece::Pyramid);
+    while (pieces)
+    {
+        loc = pieces.PopLSB();
+        GeneratePyramidMoves(board, loc);
+    }
+
+    pieces = board.GetPieces(_playerToMove, Piece::Scarab);
+    while (pieces)
+    {
+        loc = pieces.PopLSB();
+        GenerateScarabMoves(board, loc);
+    }
+
+    pieces = board.GetPieces(_playerToMove, Piece::Pharaoh);
+    while (pieces)
+    {
+        loc = pieces.PopLSB();
+        GeneratePharaohMoves(board, loc);
+    }
+
+    pieces = board.GetPieces(_playerToMove, Piece::Sphinx);
+    while (pieces)
+    {
+        loc = pieces.PopLSB();
+        GenerateSphinxMoves(board, loc);
     }
 }
 
@@ -98,15 +103,22 @@ void MoveGenerator::AddMove(const Board& board, int start, int end, int rotation
     // Is this move dynamic and not obviously losing?
     bool capturesOnly = _stoppedStage == Quiet;
 
-    if (_laser.PathAt(start) >= 0 || _laser.PathAt(end) >= 0)
+    if (_laser.PathAt(start) || _laser.PathAt(end))
     {
         // Fire the laser and check whether anything would die.
         Square sq = board.Get(start);
         if (rotation != 0)
             sq = Rotate(sq, rotation);
 
-        int killLoc = _laser.FireWillKill(_playerToMove, board, start, end, sq, board.Get(end));
-        if (board.Get(killLoc) != OffBoard)
+        int killLoc;
+        if (_laser.FireWillKill(
+            _playerToMove,
+            board,
+            start,
+            end,
+            sq,
+            board.Get(end),
+            &killLoc))
         {
             // Either capture or suicide.
             if (killLoc == end || GetOwner(board.Get(killLoc)) == _playerToMove)
@@ -144,14 +156,15 @@ void MoveGenerator::GenerateAnubisMoves(const Board& board, int loc)
 
     // Find the non-rotation moves.
     // These moves can be blocked.
-    for (size_t d = 0; d < Directions.size(); d++)
+    BB dest = Bitboards::neighbours[loc]
+            & Bitboards::canMove[player]
+            & ~board.GetPieces();
+
+    while (dest)
     {
         // Is there a space in this direction?
-        destIndex = loc + Directions[d];
-        if (board.Get(destIndex) == Empty && CanMove[player][destIndex])
-        {
-            AddMove(board, loc, destIndex, 0);
-        }
+        destIndex = dest.PopLSB();
+        AddMove(board, loc, destIndex, 0);
     }
 
     // Find the rotation moves.
@@ -176,13 +189,17 @@ void MoveGenerator::GenerateScarabMoves(const Board& board, int loc)
     Square sq;
 
     // Find the non-rotation moves.
-    // These moves can be blocked.
-    for (size_t d = 0; d < Directions.size(); d++)
+    BB dest = Bitboards::neighbours[loc]
+            & Bitboards::canMove[player];
+
+    while (dest)
     {
-        // Is there a space or swappable piece in this direction?
-        destIndex = loc + Directions[d];
+        destIndex = dest.PopLSB();
+
+        // If the destination is occupied then ensure it contains a type of
+        // piece that can be swapped with.
         sq = board.Get(destIndex);
-        if ((sq == Empty || (sq != OffBoard && (int)GetPiece(sq) < 4)) && CanMove[player][destIndex])
+        if (sq == Empty || int(GetPiece(sq)) < 4)
         {
             AddMove(board, loc, destIndex, 0);
         }
@@ -200,14 +217,15 @@ void MoveGenerator::GeneratePharaohMoves(const Board& board, int loc)
 
     // Find the non-rotation moves.
     // These moves can be blocked.
-    for (size_t d = 0; d < Directions.size(); d++)
+    BB dest = Bitboards::neighbours[loc]
+            & Bitboards::canMove[player]
+            & ~board.GetPieces();
+
+    while (dest)
     {
         // Is there a space in this direction?
-        destIndex = loc + Directions[d];
-        if (board.Get(destIndex) == Empty && CanMove[player][destIndex])
-        {
-            AddMove(board, loc, destIndex, 0);
-        }
+        destIndex = dest.PopLSB();
+        AddMove(board, loc, destIndex, 0);
     }
 }
 
@@ -216,7 +234,7 @@ void MoveGenerator::GenerateSphinxMoves(const Board& board, int loc)
 {
     // There is exactly one rotation move available.
     Player player = board.PlayerToMove();
-    Square sq = board.Get(Sphinx[(int)player]);
+    Square sq = board.Get(loc);
     int o = GetOrientation(sq);
     int rotation = player == Player::Silver
                    ? (o == Up ? -1 : 1)

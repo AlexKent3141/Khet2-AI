@@ -7,7 +7,7 @@
 
 inline std::string LocationToString(int loc)
 {
-    const std::string Files = "XabcdefghijX";
+    const std::string Files = "abcdefghij";
     return Files[loc % BoardWidth] + std::to_string(loc / BoardWidth);
 }
 

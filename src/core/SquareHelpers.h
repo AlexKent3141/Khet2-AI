@@ -39,7 +39,7 @@ inline Square Rotate(Square s, int rotation)
 
 inline bool IsPiece(Square s)
 {
-    return s != Empty && s != OffBoard;
+    return s != Empty;
 }
 
 #endif // __SQUARE_HELPERS_H__

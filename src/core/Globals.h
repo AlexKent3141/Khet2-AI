@@ -19,9 +19,6 @@ const int TimeSinceCaptureLimit = 100; // 100 plys = 50 moves each.
 // Assume that one piece is captured per TimeSinceCaptureLimit of moves.
 const int MaxGameLength = TimeSinceCaptureLimit * 2 * (NumPiecesPerPlayer - 4);
 
-// This constant is used to indicate that a location is off board.
-const Square OffBoard = 0;
-
 // This constant is used to indicate that a location is empty.
 const Square Empty = 1;
 
@@ -42,31 +39,7 @@ const std::vector<int> Rotations = {
 };
 
 // Cache the Sphinx locations for each player.
-const int Sphinx[2] = { 22, 97 };
-
-// Cache the locations that each player can move to.
-const int CanMove[2][BoardArea] = { 
-    {
-        0, 1, 1, 1, 1, 1, 1, 1, 0, 1,
-        0, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        0, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        0, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        0, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        0, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        0, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        0, 1, 1, 1, 1, 1, 1, 1, 0, 1,
-    },
-    {
-        1, 0, 1, 1, 1, 1, 1, 1, 1, 0,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-        1, 0, 1, 1, 1, 1, 1, 1, 1, 0,
-    }
-};
+const int Sphinx[2] = { 9, 70 };
 
 const int Dead = -1;
 const int Absorbed = -2;

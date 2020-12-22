@@ -1,11 +1,16 @@
 #include "catch2/catch.hpp"
 #include "core/Board.h"
 #include "core/MoveGenerator.h"
+#include "core/Bitboard.h"
+#include "core/Zobrist.h"
 #include <iostream>
 
 // Count the number of moves available in the position.
 int CountMoves(const Board& board)
 {
+    Zobrist::Initialise();
+    Bitboards::Initialise();
+
     MoveGenerator gen(board);
     int count = 0;
     Move move = NoMove;

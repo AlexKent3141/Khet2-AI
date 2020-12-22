@@ -8,24 +8,53 @@
 class PathLaser : public Laser
 {
 public:
-    bool Fire(const Player& player, const ILaserable& board) override
+    bool Fire(
+        const Player& player,
+        const ILaserable& board) override
     {
-        memset(_laserPath, -1, BoardArea*sizeof(int));
         return Laser::Fire(player, board);
     }
 
-    // This method calculates whether a piece will die when the laser is fired after the specified
-    // move has been made.
-    int FireWillKill(const Player& player, const ILaserable& board, int start, int end, Square finalSq, Square initialEndSq)
+    // This method calculates whether a piece will die when the laser is fired
+    // after the specified move has been made.
+    bool FireWillKill(
+        const Player& player,
+        const ILaserable& board,
+        int start,
+        int end,
+        Square finalSq,
+        Square initialEndSq,
+        int* killLoc)
     {
-       // Find the starting location and direction for the laserbeam.
+        BB allPieces = board.GetPieces();
+
+        allPieces.Unset(start);
+
+        if (allPieces.Test(end))
+        {
+            // It's a swap.
+            allPieces.Set(start);
+        }
+
+        allPieces.Set(end);
+
+        // Find the starting location and direction for the laserbeam.
         int ti = Sphinx[(int)player];
         int ts = Empty;
         int dirIndex = GetOrientation(board.Get(ti));
-        while (ts != OffBoard && dirIndex >= 0)
+        while (dirIndex >= 0)
         {
-            // Take a step with the laserbeam.
-            ti += Directions[dirIndex];
+            BB attacked = Bitboards::rays[ti][dirIndex] & allPieces;
+
+            if (!attacked)
+            {
+                // Nothing is killed - not sure what to return!
+                return false;
+            }
+
+            ti = dirIndex < 2
+                ? attacked.LSB()
+                : attacked.MSB();
 
             // Is this location occupied?
             if (ti == start && start != end)
@@ -48,18 +77,9 @@ public:
             }
         }
 
-        return ti;
+        *killLoc = ti;
+        return true;
     }
-
-    void OnStep(int targetIndex, int postDir) override
-    {
-        _laserPath[targetIndex] = postDir;
-    }
-
-    inline int PathAt(int loc) const { return _laserPath[loc]; }
-
-private:
-    int _laserPath[BoardArea];
 };
 
 #endif // __PATH_LASER_H__

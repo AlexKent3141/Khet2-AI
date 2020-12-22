@@ -3,6 +3,7 @@
 #include "core/EvalParams.h"
 #include "core/Evaluator.h"
 #include "core/MoveGenerator.h"
+#include "core/Bitboard.h"
 #include "core/Zobrist.h"
 #include <cassert>
 #include <cstdlib>
@@ -37,9 +38,8 @@ void RunTerminationTest(const std::string& khetPos, Player player)
     // Use fixed seed.
     srand(0xC2E1E8AE);
 
-    // Ensure that Zobrist hashes are initialised so that repetition is
-    // detected correctly.
     Zobrist::Initialise();
+    Bitboards::Initialise();
 
     std::string khetPosFull = khetPos + " " + std::to_string(int(player));
 
@@ -58,6 +58,7 @@ void RunTerminationTest(const std::string& khetPos, Player player)
             if ((move = GetRandomMove(board)) != NoMove)
             {
                 // Make the move.
+                std::cout << "Move: " << ToString(move) << std::endl;
                 board.MakeMove(move);
             }
             else

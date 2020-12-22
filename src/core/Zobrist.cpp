@@ -10,8 +10,13 @@ static_assert(
 uint64_t silver;
 uint64_t keys[0xFF][BoardArea];
 
+static bool initialised = false;
+
 void Zobrist::Initialise()
 {
+    if (initialised) return;
+    initialised = true;
+
     // Note: This is the seed that Stockfish uses.
     RandomGenerator gen(1070372);
     silver = gen.Next();
