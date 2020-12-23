@@ -7,6 +7,9 @@
 
 MoveGenerator::MoveGenerator(const Board& board, int finalStage)
 {
+    memset(&_moves[0], NoMove, Stage::Done*MaxMoves*sizeof(Move));
+    memset(&_numMovesPerStage[0], 0, Stage::Done*sizeof(int));
+
     _stoppedStage = finalStage + 1;
     if (!board.IsCheckmate() && !board.IsDraw())
     {
@@ -16,12 +19,24 @@ MoveGenerator::MoveGenerator(const Board& board, int finalStage)
 
 MoveGenerator::MoveGenerator(const Board& board, Move hashMove, Move killerMove, int finalStage)
 {
-    if (hashMove != NoMove) _moveBuffers[Priority].push_back(hashMove);
-    if (killerMove != NoMove) _moveBuffers[Priority].push_back(killerMove);
+    memset(&_moves[0], NoMove, Stage::Done*MaxMoves*sizeof(Move));
+    memset(&_numMovesPerStage[0], 0, Stage::Done*sizeof(int));
 
     _stoppedStage = finalStage + 1;
     if (!board.IsCheckmate() && !board.IsDraw())
     {
+        if (hashMove != NoMove)
+        {
+            _moves[Priority*MaxMoves + _numMovesPerStage[Priority]] = hashMove;
+            ++_numMovesPerStage[Priority];
+        }
+
+        if (killerMove != NoMove)
+        {
+            _moves[Priority*MaxMoves + _numMovesPerStage[Priority]] = killerMove;
+            ++_numMovesPerStage[Priority];
+        }
+
         Generate(board);
     }
 }
@@ -30,19 +45,19 @@ MoveGenerator::MoveGenerator(const Board& board, Move hashMove, Move killerMove,
 Move MoveGenerator::Next()
 {
     // Ensure that the current stage has moves.
-    while (_stage != _stoppedStage && ++_moveIndex >= (int)_currentMoves->size())
+    while (_stage != _stoppedStage && ++_moveIndex >= _numMovesPerStage[_stage])
     {
         _moveIndex = -1;
         NextStage();
     }
 
-    return _stage != _stoppedStage ? (*_currentMoves)[_moveIndex] : NoMove;
+    return _stage != _stoppedStage ? *(_currentMoves + _moveIndex) : NoMove;
 }
 
 void MoveGenerator::NextStage()
 {
     ++_stage;
-    _currentMoves = _stage == Done ? nullptr : &_moveBuffers[_stage];
+    _currentMoves = _stage == Done ? nullptr : &_moves[_stage*MaxMoves];
 }
 
 // Generate all of the moves and cache them as either captures or quiet.
@@ -90,7 +105,8 @@ void MoveGenerator::Generate(const Board& board)
 
 void MoveGenerator::Sort(Stage stage, const History& history)
 {
-    std::sort(_moveBuffers[stage].begin(), _moveBuffers[stage].end(),
+    std::sort(&_moves[stage*MaxMoves],
+              &_moves[stage*MaxMoves + _numMovesPerStage[stage]],
         [&] (const Move& m1, const Move& m2)
     {
         return history.Score(_playerToMove, m1) > history.Score(_playerToMove, m2);
@@ -102,6 +118,8 @@ void MoveGenerator::AddMove(const Board& board, int start, int end, int rotation
 {
     // Is this move dynamic and not obviously losing?
     bool capturesOnly = _stoppedStage == Quiet;
+
+    Stage bufferType = Quiet;
 
     if (_laser.PathAt(start) || _laser.PathAt(end))
     {
@@ -124,29 +142,36 @@ void MoveGenerator::AddMove(const Board& board, int start, int end, int rotation
             if (killLoc == end || GetOwner(board.Get(killLoc)) == _playerToMove)
             {
                 if (!capturesOnly)
-                    _moveBuffers[Suicide].push_back(MakeMove(start, end, rotation));
+                {
+                    bufferType = Suicide;
+                }
             }
             else
             {
-                _moveBuffers[Dynamic].push_back(MakeMove(start, end, rotation));
+                bufferType = Dynamic;
             }
         }
         else
         {
             if (!capturesOnly)
-                _moveBuffers[Quiet].push_back(MakeMove(start, end, rotation));
+                bufferType = Quiet;
         }
     }
     else
     {
         if (_passiveCapture)
-            _moveBuffers[Dynamic].push_back(MakeMove(start, end, rotation));
+            bufferType = Dynamic;
         else
         {
             if (!capturesOnly)
-                _moveBuffers[Quiet].push_back(MakeMove(start, end, rotation));
+                bufferType = Quiet;
         }
     }
+
+    _moves[bufferType*MaxMoves + _numMovesPerStage[bufferType]] =
+        MakeMove(start, end, rotation);
+
+    ++_numMovesPerStage[bufferType];
 }
 
 void MoveGenerator::GenerateAnubisMoves(const Board& board, int loc)

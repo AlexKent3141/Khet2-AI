@@ -10,6 +10,7 @@ const int BoardWidth = 10;
 const int BoardHeight = 8;
 const int BoardArea = BoardWidth * BoardHeight;
 const int NumPiecesPerPlayer = 13;
+const int MaxMoves = 8 * NumPiecesPerPlayer;
 
 // Rules constants.
 const int RepetitionLimit = 3;

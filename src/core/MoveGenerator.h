@@ -6,6 +6,7 @@
 #include "History.h"
 #include "PathLaser.h"
 #include "Types.h"
+#include <array>
 
 // Generate all of the moves for the specified position in order of urgency.
 class MoveGenerator
@@ -39,8 +40,9 @@ private:
     PathLaser _laser;
 
     // Maintain a buffer for each stage.
-    std::vector<Move> _moveBuffers[Done];
-    std::vector<Move>* _currentMoves = &_moveBuffers[Priority];
+    std::array<Move, Stage::Done*MaxMoves> _moves;
+    std::array<int, Stage::Done> _numMovesPerStage;
+    Move* _currentMoves = &_moves[0];
 
     void AddMove(const Board&, int, int, int);
 
