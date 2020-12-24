@@ -11,8 +11,6 @@
 class BB
 {
 public:
-    static constexpr int NoBit = -1;
-
     BB();
     BB(const BB&);
     BB& operator==(const BB&);
@@ -69,11 +67,10 @@ public:
     {
         assert(i < WholeBoard);
         if (i < HalfBoard)
-            return lower_ & (uint64_t(1) << i);
+            return lower_ & (One << i);
         else
-            return upper_ & (uint64_t(1) << (i - HalfBoard));
+            return upper_ & (One << (i - HalfBoard));
     }
-
 
     inline void Reset()
     {
@@ -97,13 +94,13 @@ public:
 
     inline int PopLSB()
     {
-        int bit = BB::NoBit;
+        int bit;
         if (lower_)
         {
             bit = __builtin_ctzll(lower_);
             lower_ &= ~(One << bit);
         }
-        else if (upper_)
+        else
         {
             bit = __builtin_ctzll(upper_);
             upper_ &= ~(One << bit);
@@ -115,14 +112,14 @@ public:
 
     inline int PopMSB()
     {
-        int bit = BB::NoBit;
+        int bit;
         if (upper_)
         {
             bit = 63 - __builtin_clzll(upper_);
             upper_ &= ~(One << bit);
             bit += HalfBoard;
         }
-        else if (lower_)
+        else
         {
             bit = 63 - __builtin_clzll(lower_);
             lower_ &= ~(One << bit);
@@ -133,7 +130,8 @@ public:
 
     inline int PopCount() const
     {
-        return __builtin_popcountll(lower_) + __builtin_popcountll(upper_);
+        return __builtin_popcountll(lower_)
+             + __builtin_popcountll(upper_);
     }
 
 private:
