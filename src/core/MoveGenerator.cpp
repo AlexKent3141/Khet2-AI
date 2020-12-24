@@ -119,7 +119,7 @@ void MoveGenerator::AddMove(const Board& board, int start, int end, int rotation
     // Is this move dynamic and not obviously losing?
     bool capturesOnly = _stoppedStage == Quiet;
 
-    Stage bufferType = Quiet;
+    Stage bufferType = Stage::Done;
 
     if (_laser.PathAt(start) || _laser.PathAt(end))
     {
@@ -168,10 +168,13 @@ void MoveGenerator::AddMove(const Board& board, int start, int end, int rotation
         }
     }
 
-    _moves[bufferType*MaxMoves + _numMovesPerStage[bufferType]] =
-        MakeMove(start, end, rotation);
+    if (bufferType != Stage::Done)
+    {
+        _moves[bufferType*MaxMoves + _numMovesPerStage[bufferType]] =
+            MakeMove(start, end, rotation);
 
-    ++_numMovesPerStage[bufferType];
+        ++_numMovesPerStage[bufferType];
+    }
 }
 
 void MoveGenerator::GenerateAnubisMoves(const Board& board, int loc)
