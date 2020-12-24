@@ -1,7 +1,7 @@
 #include "catch2/catch.hpp"
 #include "core/Board.h"
 #include "core/MoveGenerator.h"
-#include "core/Bitboard.h"
+#include "core/Bitboard.hpp"
 #include "core/Zobrist.h"
 #include <string>
 

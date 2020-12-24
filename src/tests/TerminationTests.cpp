@@ -3,7 +3,7 @@
 #include "core/EvalParams.h"
 #include "core/Evaluator.h"
 #include "core/MoveGenerator.h"
-#include "core/Bitboard.h"
+#include "core/Bitboard.hpp"
 #include "core/Zobrist.h"
 #include <cassert>
 #include <cstdlib>

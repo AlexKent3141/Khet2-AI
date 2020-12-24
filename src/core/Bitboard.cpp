@@ -1,13 +1,8 @@
-#include "Bitboard.h"
+#include "Bitboard.hpp"
 #include <cassert>
 #include <array>
 #include <iostream>
 #include <utility>
-
-constexpr uint64_t One = 1;
-constexpr int WholeBoard = 80;
-constexpr int HalfBoard = WholeBoard/2;
-constexpr uint64_t First40Bits = 0xFFFFFFFFFF;
 
 BB::BB()
 :
@@ -32,123 +27,6 @@ BB& BB::operator==(const BB& other)
     }
 
     return *this;
-}
-
-BB BB::operator~()
-{
-    BB inverted;
-    inverted.lower_ = (~lower_ & First40Bits);
-    inverted.upper_ = (~upper_ & First40Bits);
-    return inverted;
-}
-
-BB& BB::operator&=(const BB& other)
-{
-    lower_ &= other.lower_;
-    upper_ &= other.upper_;
-    return *this;
-}
-
-BB& BB::operator|=(const BB& other)
-{
-    lower_ |= other.lower_;
-    upper_ |= other.upper_;
-    return *this;
-}
-
-BB& BB::operator^=(const BB& other)
-{
-    lower_ ^= other.lower_;
-    upper_ ^= other.upper_;
-    return *this;
-}
-
-void BB::Set(int i)
-{
-    assert(i < WholeBoard);
-    if (i < HalfBoard)
-        lower_ |= (One << i);
-    else
-        upper_ |= (One << (i - HalfBoard));
-}
-
-void BB::Unset(int i)
-{
-    assert(i < WholeBoard);
-    if (i < HalfBoard)
-        lower_ &= ~(One << i);
-    else
-        upper_ &= ~(One << (i - HalfBoard));
-}
-
-void BB::Reset()
-{
-    lower_ = 0;
-    upper_ = 0;
-}
-
-bool BB::Test(int i) const
-{
-    assert(i < WholeBoard);
-    if (i < HalfBoard)
-        return lower_ & (One << i);
-    else
-        return upper_ & (One << (i - HalfBoard));
-}
-
-int BB::LSB() const
-{
-    return lower_
-        ? __builtin_ctzll(lower_)
-        : __builtin_ctzll(upper_) + HalfBoard;
-}
-
-int BB::MSB() const
-{
-    return upper_
-        ? 63 - __builtin_clzll(upper_) + HalfBoard
-        : 63 - __builtin_clzll(lower_);
-}
-
-int BB::PopLSB()
-{
-    int bit = BB::NoBit;
-    if (lower_)
-    {
-        bit = __builtin_ctzll(lower_);
-        lower_ &= ~(One << bit);
-    }
-    else if (upper_)
-    {
-        bit = __builtin_ctzll(upper_);
-        upper_ &= ~(One << bit);
-        bit += HalfBoard;
-    }
-
-    return bit;
-}
-
-int BB::PopMSB()
-{
-    int bit = BB::NoBit;
-    if (upper_)
-    {
-        bit = 63 - __builtin_clzll(upper_);
-        upper_ &= ~(One << bit);
-        bit += HalfBoard;
-    }
-    else if (lower_)
-    {
-        bit = 63 - __builtin_clzll(lower_);
-        lower_ &= ~(One << bit);
-    }
-
-    return bit;
-}
-
-int BB::PopCount() const
-{
-    return __builtin_popcountll(lower_) + __builtin_popcountll(upper_);
 }
 
 BB operator&(BB a, const BB& b) { return a &= b; }

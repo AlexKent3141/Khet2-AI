@@ -1,7 +1,7 @@
 #ifndef __LASER_H__
 #define __LASER_H__
 
-#include "Bitboard.h"
+#include "Bitboard.hpp"
 #include "Globals.h"
 #include "ILaserable.h"
 #include "SquareHelpers.h"

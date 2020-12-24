@@ -1,7 +1,7 @@
 #ifndef __BOARD_H__
 #define __BOARD_H__
 
-#include "Bitboard.h"
+#include "Bitboard.hpp"
 #include "Globals.h"
 #include "ILaserable.h"
 #include "Laser.h"

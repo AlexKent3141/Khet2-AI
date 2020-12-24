@@ -1,5 +1,5 @@
 #include "MoveGenerator.h"
-#include "Bitboard.h"
+#include "Bitboard.hpp"
 #include "MoveHelpers.h"
 #include "SquareHelpers.h"
 #include <algorithm>

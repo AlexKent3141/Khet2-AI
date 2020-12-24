@@ -1,7 +1,7 @@
 #ifndef __ILASERABLE_H__
 #define __ILASERABLE_H__
 
-#include "Bitboard.h"
+#include "Bitboard.hpp"
 
 // This class is an interface for objects which can be lasered.
 class ILaserable
