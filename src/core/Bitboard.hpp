@@ -5,6 +5,44 @@
 #include <cassert>
 #include <cstdint>
 
+#ifdef _MSC_VER
+#include "intrin.h"
+
+    inline int ctz(uint64_t word)
+    {
+        unsigned long i;
+        _BitScanForward64(&i, word);
+        return i;
+    }
+
+    inline int clz(uint64_t word)
+    {
+        return __lzcnt64(word);
+    }
+
+    inline int popcnt(uint64_t word)
+    {
+        return __popcnt64(word);
+    }
+#elif __GNUC__
+    inline int ctz(uint64_t word)
+    {
+        return __builtin_ctzll(word);
+    }
+
+    inline int clz(uint64_t word)
+    {
+        return __builtin_clzll(word);
+    }
+
+    inline int popcnt(uint64_t word)
+    {
+        return __builtin_popcountll(word);
+    }
+#else
+#error "No implementation of ctz, clz & popcnt."
+#endif
+
 // The Khet board is 10x8, so no single integer type can mask the whole board.
 // The approach I'm taking is to use one 64 bit word to cover the lower 5x8
 // half of the board and another for the upper 5x8 half.
@@ -81,15 +119,15 @@ public:
     inline int LSB() const
     {
         return lower_
-            ? __builtin_ctzll(lower_)
-            : __builtin_ctzll(upper_) + HalfBoard;
+            ? ctz(lower_)
+            : ctz(upper_) + HalfBoard;
     }
 
     inline int MSB() const
     {
         return upper_
-            ? 63 - __builtin_clzll(upper_) + HalfBoard
-            : 63 - __builtin_clzll(lower_);
+            ? 63 - clz(upper_) + HalfBoard
+            : 63 - clz(lower_);
     }
 
     inline int PopLSB()
@@ -97,12 +135,12 @@ public:
         int bit;
         if (lower_)
         {
-            bit = __builtin_ctzll(lower_);
+            bit = ctz(lower_);
             lower_ &= ~(One << bit);
         }
         else
         {
-            bit = __builtin_ctzll(upper_);
+            bit = ctz(upper_);
             upper_ &= ~(One << bit);
             bit += HalfBoard;
         }
@@ -115,13 +153,13 @@ public:
         int bit;
         if (upper_)
         {
-            bit = 63 - __builtin_clzll(upper_);
+            bit = 63 - clz(upper_);
             upper_ &= ~(One << bit);
             bit += HalfBoard;
         }
         else
         {
-            bit = 63 - __builtin_clzll(lower_);
+            bit = 63 - clz(lower_);
             lower_ &= ~(One << bit);
         }
 
@@ -130,8 +168,8 @@ public:
 
     inline int PopCount() const
     {
-        return __builtin_popcountll(lower_)
-             + __builtin_popcountll(upper_);
+        return popcnt(lower_)
+             + popcnt(upper_);
     }
 
 private:
