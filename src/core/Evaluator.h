@@ -12,15 +12,14 @@ public:
     Evaluator();
     Evaluator(const EvalParams&);
 
-    int MaxScore() const { return _params.CheckmateVal(); }
+    inline int MaxScore() const { return _params.CheckmateVal(); }
     
     // Evaluate the specified position.
     int operator()(const Board&) const;
 
 private:
+    static Laser _laser;
     EvalParams _params;
-
-    int Distance(int, int) const;
 
     // Check if the board is in a terminal state and score appropriately if so.
     bool TerminalScore(const Board&, int*) const;
@@ -32,7 +31,7 @@ private:
     int LaserableScore(const Board&) const;
 
     // Compute the number of laserable squares for the specified player.
-    inline int LaserableScore(Player, const Board&) const;
+    int LaserableScore(Player, const Board&) const;
 };
 
 #endif // __EVALUATOR_H__
