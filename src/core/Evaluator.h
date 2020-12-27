@@ -9,7 +9,7 @@
 class Evaluator
 {
 public:
-    Evaluator();
+    Evaluator() = delete;
     Evaluator(const EvalParams&);
 
     inline int MaxScore() const { return _params.CheckmateVal(); }

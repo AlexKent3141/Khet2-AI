@@ -6,17 +6,12 @@
 
 int Distance(int loc1, int loc2)
 {
-    int xDiff = std::abs((loc1 - loc2) % BoardWidth);
-    int yDiff = std::abs((loc1 - loc2) / BoardWidth);
+    const int xDiff = std::abs((loc1 - loc2) % BoardWidth);
+    const int yDiff = std::abs((loc1 - loc2) / BoardWidth);
     return std::max(xDiff, yDiff);
 }
 
 Laser Evaluator::_laser = Laser();
-
-Evaluator::Evaluator()
-{
-    _params = EvalParams();
-}
 
 Evaluator::Evaluator(const EvalParams& params)
 {
@@ -46,14 +41,20 @@ bool Evaluator::TerminalScore(const Board& board, int* score) const
 
 int Evaluator::MaterialScore(const Board& board) const
 {
+    constexpr std::array<Player, 2> PlayerTypes =
+        { Player::Silver, Player::Red };
+
+    constexpr std::array<Piece, 3> PieceTypes =
+        { Piece::Anubis, Piece::Pyramid, Piece::Scarab };
+
     int eval = 0, pieceVal, pharaohVal, pharaohLoc, loc, sign;
     BB pieces;
 
-    for (Player player : { Player::Silver, Player::Red })
+    for (Player player : PlayerTypes)
     {
         sign = player == Player::Silver ? 1 : -1;
         pharaohLoc = board.PharaohPosition(player);
-        for (Piece piece : { Piece::Anubis, Piece::Pyramid, Piece::Scarab })
+        for (Piece piece : PieceTypes)
         {
             pieces = board.GetPieces(player, piece);
             while (pieces)
@@ -72,7 +73,8 @@ int Evaluator::MaterialScore(const Board& board) const
 
 int Evaluator::LaserableScore(const Board& board) const
 {
-    return LaserableScore(Player::Silver, board) - LaserableScore(Player::Red, board);
+    return LaserableScore(Player::Silver, board)
+         - LaserableScore(Player::Red, board);
 }
 
 int Evaluator::LaserableScore(Player player, const Board& board) const
